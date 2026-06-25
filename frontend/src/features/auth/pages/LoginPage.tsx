@@ -1,20 +1,77 @@
+import { AxiosError } from 'axios';
+import { LockKeyhole, Mail } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Link, useLocation, useNavigate } from 'react-router';
+
+import { Button } from '../../../shared/ui/Button';
+import { FormField } from '../../../shared/ui/FormField';
+import { AuthCard } from '../components/AuthCard';
+import { useAuth } from '../hooks/useAuth';
+import { loginSchema, type LoginFormData } from '../schemas/auth.schemas';
+
+type LoginLocationState = {
+  from?: {
+    pathname?: string;
+  };
+};
+
 export function LoginPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const {
+    formState: { errors, isSubmitting },
+    handleSubmit,
+    register,
+    setError,
+  } = useForm<LoginFormData>();
+
+  async function onSubmit(data: LoginFormData) {
+    setSubmitError(null);
+    const parsed = loginSchema.safeParse(data);
+
+    if (!parsed.success) {
+      parsed.error.issues.forEach((issue) => {
+        setError(issue.path[0] as keyof LoginFormData, { message: issue.message });
+      });
+      return;
+    }
+
+    try {
+      await login(parsed.data);
+      const state = location.state as LoginLocationState | null;
+      navigate(state?.from?.pathname ?? '/dashboard', { replace: true });
+    } catch (error) {
+      const message = error instanceof AxiosError ? error.response?.data?.message : null;
+      setSubmitError(message ?? 'E-mail ou senha invalidos.');
+    }
+  }
+
   return (
-    <section className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-6">
-      <h1 className="text-xl font-semibold tracking-normal">Entrar</h1>
-      <form className="mt-6 space-y-4">
-        <label className="block text-sm font-medium text-slate-700">
-          E-mail
-          <input className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" type="email" />
-        </label>
-        <label className="block text-sm font-medium text-slate-700">
-          Senha
-          <input className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" type="password" />
-        </label>
-        <button className="w-full rounded-md bg-slate-950 px-4 py-2 font-medium text-white" type="button">
-          Acessar
-        </button>
+    <AuthCard
+      eyebrow="Sessao segura"
+      footer={
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link className="font-semibold text-fuchsia-700 hover:text-fuchsia-600" to="/forgot-password">
+            Esqueci minha senha
+          </Link>
+          <Link className="font-semibold text-fuchsia-700 hover:text-fuchsia-600" to="/register">
+            Criar conta
+          </Link>
+        </div>
+      }
+      title="Entre para organizar seu dinheiro"
+    >
+      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <FormField autoComplete="email" error={errors.email?.message} id="email" label="E-mail" leadingIcon={<Mail size={18} />} type="email" {...register('email')} />
+        <FormField autoComplete="current-password" error={errors.password?.message} id="password" label="Senha" leadingIcon={<LockKeyhole size={18} />} type="password" {...register('password')} />
+        {submitError ? <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{submitError}</p> : null}
+        <Button className="w-full" isLoading={isSubmitting} type="submit">
+          Entrar
+        </Button>
       </form>
-    </section>
+    </AuthCard>
   );
 }
