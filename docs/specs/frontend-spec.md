@@ -65,6 +65,13 @@ src
 │   │   ├── services
 │   │   ├── schemas
 │   │   └── types
+│   ├── admin
+│   │   ├── pages
+│   │   ├── components
+│   │   ├── hooks
+│   │   ├── services
+│   │   ├── schemas
+│   │   └── types
 │   ├── dashboard
 │   ├── accounts
 │   ├── categories
@@ -95,6 +102,8 @@ src
 - Após login, redirecionar para dashboard.
 - Rotas principais:
   - `/login`, `/register`, `/forgot-password`.
+  - `/account-status/pending`, `/account-status/suspended`, `/account-status/rejected`, `/account-status/unavailable`.
+  - `/admin/users`, `/admin/users/pending`, `/admin/users/:id`.
   - `/dashboard`.
   - `/accounts`, `/categories`, `/transactions`, `/bills`, `/budgets`, `/goals`.
   - `/credit-cards`, `/credit-cards/:id`, `/credit-cards/:id/invoices/current`, `/credit-cards/:id/invoices`.
@@ -107,6 +116,15 @@ src
 - Interceptor trata 401 tentando refresh uma vez.
 - Se refresh falhar, limpar sessão e redirecionar para login.
 - Nunca armazenar dados financeiros sensíveis em localStorage.
+- Após cadastro, exibir mensagem de conta pendente de aprovação e não autenticar automaticamente.
+- Usuários pendentes, negados ou suspensos devem ver mensagem objetiva no login.
+- Quando o login retornar `403` com `userStatus`, redirecionar para a tela pública correspondente:
+  - `PENDING_APPROVAL` para `/account-status/pending`.
+  - `SUSPENDED` para `/account-status/suspended`.
+  - `REJECTED` para `/account-status/rejected`.
+  - `DELETED` para `/account-status/unavailable`.
+- Rotas administrativas devem exigir role `ADMIN`.
+- Usuários comuns não devem enxergar links ou rotas do painel admin.
 
 ## 7. Consumo da API
 
@@ -181,6 +199,13 @@ Composition patterns:
 ## 14. Telas obrigatórias do MVP
 
 - Login, cadastro e recuperação de senha.
+- Tela de cadastro pendente aguardando aprovação.
+- Tela de conta suspensa.
+- Tela de cadastro negado.
+- Tela de conta indisponível/excluída.
+- Admin: listagem de usuários pendentes.
+- Admin: listagem geral de usuários por status.
+- Admin: detalhes básicos do usuário e ações de aprovar, negar, suspender, reativar e excluir/desativar.
 - Dashboard.
 - Contas financeiras e criar/editar conta.
 - Categorias e criar/editar categoria.
@@ -197,7 +222,8 @@ Composition patterns:
 
 ## 15. Componentes por feature
 
-- `auth`: `LoginForm`, `RegisterForm`, `ForgotPasswordForm`.
+- `auth`: `LoginForm`, `RegisterForm`, `ForgotPasswordForm`, `AccountStatusPage`, `PendingApprovalMessage`, `SuspendedAccountMessage`, `RejectedAccountMessage`.
+- `admin`: `AdminUserTable`, `PendingUsersTable`, `AdminUserDetails`, `UserStatusBadge`, `ApproveUserDialog`, `RejectUserDialog`, `SuspendUserDialog`, `ReactivateUserDialog`, `DeleteUserDialog`.
 - `dashboard`: `DashboardSummary`, `IncomeExpenseChart`, `ExpenseCategoryChart`, `DueBillsList`, `BudgetProgressList`, `GoalProgressList`.
 - `accounts`: `AccountList`, `AccountForm`, `AccountCard`, `ArchiveAccountDialog`.
 - `categories`: `CategoryList`, `CategoryForm`, `CategoryBadge`.
@@ -213,6 +239,7 @@ Composition patterns:
 ## 16. Hooks por feature
 
 - `useLogin`, `useRegister`.
+- `useAdminUsers`, `usePendingUsers`, `useApproveUser`, `useRejectUser`, `useSuspendUser`, `useReactivateUser`, `useDeleteUser`.
 - `useAccounts`, `useCreateAccount`, `useUpdateAccount`.
 - `useCategories`.
 - `useTransactions`, `useCreateTransaction`.
@@ -230,6 +257,7 @@ Composition patterns:
 Cada feature terá um arquivo `services/*.service.ts` chamando o cliente HTTP:
 
 - `authService`.
+- `adminUsersService`.
 - `accountsService`.
 - `categoriesService`.
 - `transactionsService`.
@@ -263,6 +291,10 @@ Cada feature terá um arquivo `services/*.service.ts` chamando o cliente HTTP:
 ## 20. Critérios de aceite visuais e funcionais
 
 - Usuário não autenticado não acessa rotas privadas.
+- Usuário recém-cadastrado vê estado pendente e não acessa dashboard até aprovação.
+- Usuário pendente, suspenso, negado ou excluído é redirecionado para uma tela pública de status após tentativa de login.
+- Admin consegue aprovar, negar, suspender, reativar e excluir/desativar usuários.
+- Usuário comum não acessa rotas administrativas.
 - Listagens mostram loading, vazio e erro.
 - Formulários exibem validação antes de enviar dados inválidos.
 - Dashboard carrega resumo, gráficos e pendências.

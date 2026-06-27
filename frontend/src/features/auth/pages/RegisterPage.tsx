@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import { Mail, UserRound, LockKeyhole } from 'lucide-react';
+import { LockKeyhole, Mail, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router';
@@ -7,8 +7,8 @@ import { Link, useNavigate } from 'react-router';
 import { Button } from '../../../shared/ui/Button';
 import { FormField } from '../../../shared/ui/FormField';
 import { AuthCard } from '../components/AuthCard';
-import { registerSchema, type RegisterFormData } from '../schemas/auth.schemas';
 import { useAuth } from '../hooks/useAuth';
+import { registerSchema, type RegisterFormData } from '../schemas/auth.schemas';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -33,26 +33,32 @@ export function RegisterPage() {
     }
 
     try {
-      await createAccount(parsed.data);
-      navigate('/login', { replace: true });
+      const response = await createAccount(parsed.data);
+      navigate('/account-status/pending', {
+        replace: true,
+        state: {
+          email: response.email,
+          message: response.message,
+        },
+      });
     } catch (error) {
       const message = error instanceof AxiosError ? error.response?.data?.message : null;
-      setSubmitError(message ?? 'Nao foi possivel criar sua conta agora.');
+      setSubmitError(message ?? 'Nao foi possivel enviar seu cadastro agora.');
     }
   }
 
   return (
     <AuthCard
-      eyebrow="Conta protegida"
+      eyebrow="Solicitacao de acesso"
       footer={
         <>
-          Ja tem conta?{' '}
+          Ja tem conta aprovada?{' '}
           <Link className="font-semibold text-fuchsia-700 hover:text-fuchsia-600" to="/login">
             Entrar
           </Link>
         </>
       }
-      title="Crie seu acesso financeiro"
+      title="Solicite seu acesso financeiro"
     >
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <FormField autoComplete="name" error={errors.name?.message} id="name" label="Nome" leadingIcon={<UserRound size={18} />} {...register('name')} />
@@ -60,7 +66,7 @@ export function RegisterPage() {
         <FormField autoComplete="new-password" error={errors.password?.message} id="password" label="Senha" leadingIcon={<LockKeyhole size={18} />} type="password" {...register('password')} />
         {submitError ? <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{submitError}</p> : null}
         <Button className="w-full" isLoading={isSubmitting} type="submit">
-          Criar conta
+          Enviar cadastro
         </Button>
       </form>
     </AuthCard>

@@ -1,16 +1,23 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+CREATE TYPE user_role AS ENUM ('USER', 'ADMIN');
+CREATE TYPE user_status AS ENUM ('PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'SUSPENDED', 'DELETED');
+
 CREATE TABLE users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name varchar(120) NOT NULL,
     email varchar(180) NOT NULL,
     password_hash varchar(255) NOT NULL,
+    role user_role NOT NULL DEFAULT 'USER',
+    status user_status NOT NULL DEFAULT 'PENDING_APPROVAL',
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     active boolean NOT NULL DEFAULT true
 );
 
 CREATE UNIQUE INDEX ux_users_email ON users (email);
+CREATE INDEX ix_users_status ON users (status);
+CREATE INDEX ix_users_role ON users (role);
 
 CREATE TABLE refresh_tokens (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

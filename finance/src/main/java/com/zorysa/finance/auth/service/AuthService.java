@@ -1,6 +1,7 @@
 package com.zorysa.finance.auth.service;
 
 import com.zorysa.finance.auth.dto.AuthTokenResponse;
+import com.zorysa.finance.auth.dto.AuthenticatedUserResponse;
 import com.zorysa.finance.auth.dto.ForgotPasswordRequest;
 import com.zorysa.finance.auth.dto.LoginRequest;
 import com.zorysa.finance.auth.dto.RefreshTokenRequest;
@@ -12,6 +13,7 @@ import com.zorysa.finance.auth.repository.PasswordResetTokenRepository;
 import com.zorysa.finance.auth.repository.RefreshTokenRepository;
 import com.zorysa.finance.auth.security.JwtProperties;
 import com.zorysa.finance.auth.security.JwtService;
+import com.zorysa.finance.shared.exception.AccountStatusAccessDeniedException;
 import com.zorysa.finance.shared.exception.UnauthorizedException;
 import com.zorysa.finance.users.dto.UserResponse;
 import com.zorysa.finance.users.entity.User;
@@ -64,6 +66,7 @@ public class AuthService {
         User user = userService.findActiveByEmail(request.email())
                 .filter(found -> passwordEncoder.matches(request.password(), found.getPasswordHash()))
                 .orElseThrow(() -> new UnauthorizedException("Credenciais invalidas"));
+        ensureUserCanLogin(user);
         return issueTokens(user);
     }
 
@@ -115,6 +118,46 @@ public class AuthService {
                 clock.instant().plusSeconds(jwtProperties.refreshTokenExpirationSeconds())
         );
         refreshTokenRepository.save(entity);
-        return new AuthTokenResponse(accessToken, refreshToken, jwtService.accessTokenExpirationSeconds());
+        AuthenticatedUserResponse authenticatedUser = new AuthenticatedUserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole().name()
+        );
+        return new AuthTokenResponse(accessToken, refreshToken, jwtService.accessTokenExpirationSeconds(), authenticatedUser);
+    }
+
+    private void ensureUserCanLogin(User user) {
+        if (user.isApproved()) {
+            return;
+        }
+        switch (user.getStatus()) {
+            case PENDING_APPROVAL -> throw accountStatusDenied(
+                    "Sua conta está aguardando aprovação.",
+                    "ACCOUNT_PENDING_APPROVAL",
+                    "PENDING_APPROVAL"
+            );
+            case REJECTED -> throw accountStatusDenied(
+                    "Seu cadastro foi negado.",
+                    "ACCOUNT_REJECTED",
+                    "REJECTED"
+            );
+            case SUSPENDED -> throw accountStatusDenied(
+                    "Sua conta está suspensa.",
+                    "ACCOUNT_SUSPENDED",
+                    "SUSPENDED"
+            );
+            case DELETED -> throw accountStatusDenied(
+                    "Esta conta não está disponível.",
+                    "ACCOUNT_DELETED",
+                    "DELETED"
+            );
+            case APPROVED -> {
+            }
+        }
+    }
+
+    private AccountStatusAccessDeniedException accountStatusDenied(String message, String code, String userStatus) {
+        return new AccountStatusAccessDeniedException(message, code, userStatus);
     }
 }

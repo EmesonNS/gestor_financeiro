@@ -22,9 +22,32 @@
   "error": "Bad Request",
   "message": "Valor deve ser maior que zero",
   "path": "/api/transactions",
+  "code": "VALIDATION_ERROR",
   "details": []
 }
 ```
+
+Erros de autenticação/autorização podem incluir `code` e `userStatus` para permitir tratamento específico no front-end:
+
+```json
+{
+  "timestamp": "2026-01-01T10:00:00Z",
+  "status": 403,
+  "error": "Forbidden",
+  "message": "Sua conta está aguardando aprovação.",
+  "path": "/api/auth/login",
+  "code": "ACCOUNT_PENDING_APPROVAL",
+  "userStatus": "PENDING_APPROVAL",
+  "details": []
+}
+```
+
+Códigos de conta esperados:
+
+- `ACCOUNT_PENDING_APPROVAL`: cadastro aguardando aprovação.
+- `ACCOUNT_REJECTED`: cadastro negado.
+- `ACCOUNT_SUSPENDED`: conta suspensa.
+- `ACCOUNT_DELETED`: conta excluída/desativada.
 
 ## Modelo paginado
 
@@ -42,20 +65,22 @@
 
 ### POST `/api/auth/register`
 
-- Descrição: cadastra usuário.
+- Descrição: solicita cadastro de usuário.
 - Auth: não.
 - Body: `{ "name": "Maria", "email": "maria@email.com", "password": "secret" }`.
-- Response 201: `{ "id": "uuid", "name": "Maria", "email": "maria@email.com" }`.
+- Response 201: `{ "id": "uuid", "name": "Maria", "email": "maria@email.com", "status": "PENDING_APPROVAL", "message": "Cadastro enviado para aprovação." }`.
 - Erros: 400, 409.
-- Autorização: e-mail deve ser único.
+- Autorização: e-mail deve ser único; cadastro não retorna token.
 
 ### POST `/api/auth/login`
 
 - Descrição: autentica usuário.
 - Auth: não.
 - Body: `{ "email": "maria@email.com", "password": "secret" }`.
-- Response 200: `{ "accessToken": "jwt", "refreshToken": "token", "expiresIn": 900 }`.
-- Erros: 400, 401.
+- Response 200: `{ "accessToken": "jwt", "refreshToken": "token", "expiresIn": 900, "user": { "id": "uuid", "name": "Maria", "email": "maria@email.com", "role": "USER" } }`.
+- Erros: 400, 401, 403.
+- Regras: usuários `PENDING_APPROVAL`, `REJECTED`, `SUSPENDED` ou `DELETED` não recebem token de uso normal.
+- Quando o erro for causado por status administrativo, retornar `403` com `code` e `userStatus`.
 
 ### POST `/api/auth/logout`
 
@@ -111,6 +136,76 @@
 - Body: `{ "currentPassword": "old", "newPassword": "new" }`.
 - Response 204.
 - Erros: 400, 401.
+
+
+## Admin Users
+
+Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As respostas devem conter apenas dados básicos da conta do usuário, sem dados financeiros pessoais.
+
+### GET `/api/admin/users`
+
+- Descrição: lista usuários por status.
+- Auth: sim, admin.
+- Query: `page`, `size`, `status`, `search`, `createdFrom`, `createdTo`.
+- Response 200: página de `{ "id": "uuid", "name": "Maria", "email": "maria@email.com", "role": "USER", "status": "PENDING_APPROVAL", "createdAt": "...", "approvedAt": null, "rejectedAt": null, "suspendedAt": null }`.
+- Erros: 401, 403.
+- Autorização: apenas admin.
+
+### GET `/api/admin/users/pending`
+
+- Descrição: lista solicitações pendentes de aprovação.
+- Auth: sim, admin.
+- Query: `page`, `size`.
+- Response 200: página de usuários com status `PENDING_APPROVAL`.
+- Erros: 401, 403.
+
+### GET `/api/admin/users/{userId}`
+
+- Descrição: consulta dados básicos e histórico administrativo do usuário.
+- Auth: sim, admin.
+- Response 200: `{ "id": "uuid", "name": "Maria", "email": "maria@email.com", "role": "USER", "status": "PENDING_APPROVAL", "createdAt": "...", "statusHistory": [] }`.
+- Erros: 401, 403, 404.
+
+### PATCH `/api/admin/users/{userId}/approve`
+
+- Descrição: aprova usuário pendente ou anteriormente negado/suspenso.
+- Auth: sim, admin.
+- Body opcional: `{ "reason": "Aprovado manualmente" }`.
+- Response 200: usuário atualizado com status `APPROVED`.
+- Erros: 400, 401, 403, 404.
+
+### PATCH `/api/admin/users/{userId}/reject`
+
+- Descrição: nega solicitação de criação de conta.
+- Auth: sim, admin.
+- Body: `{ "reason": "Cadastro não autorizado" }`.
+- Response 200: usuário atualizado com status `REJECTED`.
+- Erros: 400, 401, 403, 404.
+
+### PATCH `/api/admin/users/{userId}/suspend`
+
+- Descrição: suspende conta já criada/aprovada.
+- Auth: sim, admin.
+- Body: `{ "reason": "Uso indevido" }`.
+- Response 200: usuário atualizado com status `SUSPENDED`.
+- Erros: 400, 401, 403, 404.
+
+### PATCH `/api/admin/users/{userId}/reactivate`
+
+- Descrição: reativa usuário suspenso, negado ou pendente, definindo status `APPROVED`.
+- Auth: sim, admin.
+- Body opcional: `{ "reason": "Reativação aprovada" }`.
+- Response 200: usuário atualizado com status `APPROVED`.
+- Erros: 400, 401, 403, 404.
+
+### DELETE `/api/admin/users/{userId}`
+
+- Descrição: exclui/desativa conta de usuário.
+- Auth: sim, admin.
+- Body opcional: `{ "reason": "Solicitação administrativa" }`.
+- Response 204.
+- Erros: 400, 401, 403, 404, 409.
+- Regra: preferir desativação lógica (`DELETED`/`active=false`) para preservar integridade de histórico financeiro.
 
 ## Accounts
 

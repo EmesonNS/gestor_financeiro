@@ -5,20 +5,21 @@
 1. Setup do projeto back-end e front-end.
 2. Banco de dados e migrations iniciais.
 3. Autenticação e segurança.
-4. Perfil do usuário.
-5. Contas financeiras.
-6. Categorias.
-7. Transações.
-8. Dashboard básico.
-9. Contas a pagar.
-10. Orçamentos.
-11. Metas financeiras.
-12. Cartões de crédito.
-13. Faturas de cartão.
-14. Compras parceladas.
-15. Relatórios básicos.
-16. Testes.
-17. Deploy.
+4. Administração de usuários e aprovação de cadastros.
+5. Perfil do usuário.
+6. Contas financeiras.
+7. Categorias.
+8. Transações.
+9. Dashboard básico.
+10. Contas a pagar.
+11. Orçamentos.
+12. Metas financeiras.
+13. Cartões de crédito.
+14. Faturas de cartão.
+15. Compras parceladas.
+16. Relatórios básicos.
+17. Testes.
+18. Deploy.
 
 ## 1. Setup e infraestrutura
 
@@ -58,6 +59,7 @@ Features:
 
 - Cadastro, login, logout, refresh token e recuperação de senha.
 - JWT e proteção de rotas.
+- Cadastro com status pendente até aprovação administrativa.
 
 Tarefas back-end:
 
@@ -65,10 +67,14 @@ Tarefas back-end:
 - Configurar Spring Security e JWT.
 - Criar endpoints de auth.
 - Implementar refresh token.
+- Bloquear emissão de token para usuários pendentes, negados, suspensos ou excluídos.
 
 Tarefas front-end:
 
 - Criar telas de login, cadastro e recuperação.
+- Exibir tela/mensagem de cadastro aguardando aprovação.
+- Exibir bloqueio claro quando login falhar por status pendente, negado ou suspenso.
+- Criar telas públicas de status de conta: aguardando aprovação, suspensa, negada e indisponível.
 - Implementar `ProtectedRoute`.
 - Configurar interceptor de token.
 
@@ -76,21 +82,97 @@ História:
 
 ```text
 Como usuário,
-quero criar conta e fazer login,
-para acessar meus dados financeiros com segurança.
+quero solicitar criação de conta,
+para acessar o sistema após aprovação administrativa.
 ```
 
 Critérios de aceite:
 
 ```text
-Dado que informo credenciais válidas,
-quando faço login,
-então recebo uma sessão autenticada e sou redirecionado ao dashboard.
+Dado que solicito cadastro,
+quando a solicitação é salva,
+então minha conta fica pendente e não recebo acesso ao dashboard.
+```
+
+```text
+Dado que minha conta está pendente, suspensa, negada ou excluída,
+quando tento fazer login,
+então sou redirecionado para uma tela pública que explica o status da minha conta.
 ```
 
 Prioridade: P0.
 
-## 3. Perfil do usuário
+
+## 3. Administração de usuários e aprovação de cadastros
+
+Objetivo: permitir que o admin controle quem pode acessar o sistema.
+
+Features:
+
+- Listar cadastros pendentes.
+- Aprovar criação de conta.
+- Negar criação de conta.
+- Suspender usuário aprovado.
+- Reativar usuário suspenso ou negado.
+- Excluir/desativar usuário.
+- Registrar histórico de decisão administrativa.
+
+Tarefas back-end:
+
+- Adicionar `role` e `status` em `users`.
+- Criar tabela `user_status_history`.
+- Criar endpoints `/api/admin/users`.
+- Implementar policies de role `ADMIN`.
+- Implementar bloqueio de login por status.
+- Criar seed ou estratégia segura para primeiro admin.
+
+Tarefas front-end:
+
+- Criar área admin separada.
+- Criar listagem de usuários por status.
+- Criar tela de detalhes administrativos do usuário.
+- Criar ações com confirmação: aprovar, negar, suspender, reativar e excluir/desativar.
+- Mostrar badges de status.
+
+História:
+
+```text
+Como administrador,
+quero aprovar ou negar novos cadastros,
+para controlar quem pode acessar o sistema.
+```
+
+Critérios de aceite:
+
+```text
+Dado que existe um usuário pendente,
+quando o admin aprova a conta,
+então o usuário passa para aprovado e consegue fazer login.
+```
+
+```text
+Dado que existe um usuário aprovado,
+quando o admin suspende a conta,
+então o usuário perde acesso às rotas privadas.
+```
+
+```text
+Dado que existe um usuário negado,
+quando o admin reativa ou aprova posteriormente,
+então o usuário passa a conseguir acessar o sistema.
+```
+
+Prioridade: P0.
+
+Funcionalidades administrativas recomendadas para evolução:
+
+- Busca por nome/e-mail.
+- Filtros por status e período.
+- Motivo obrigatório para negação, suspensão e exclusão.
+- Histórico de decisões visível na tela do usuário.
+- Indicadores de cadastros pendentes e usuários suspensos.
+
+## 4. Perfil do usuário
 
 Objetivo: permitir consulta e edição básica dos dados do usuário.
 
@@ -110,7 +192,7 @@ então o perfil passa a exibir o novo nome.
 
 Prioridade: P0.
 
-## 4. Contas financeiras
+## 5. Contas financeiras
 
 Objetivo: manter contas e saldos por usuário.
 
@@ -138,7 +220,7 @@ então a conta aparece na minha listagem com saldo atual igual ao saldo inicial.
 
 Prioridade: P0.
 
-## 5. Categorias
+## 6. Categorias
 
 Objetivo: classificar receitas e despesas.
 
@@ -158,7 +240,7 @@ então posso usá-la em despesas futuras.
 
 Prioridade: P0.
 
-## 6. Transações
+## 7. Transações
 
 Objetivo: registrar receitas e despesas e refletir saldo.
 
@@ -190,7 +272,7 @@ então o saldo da conta deve ser reduzido pelo valor da despesa.
 
 Prioridade: P0.
 
-## 7. Contas a pagar
+## 8. Contas a pagar
 
 Objetivo: controlar vencimentos e transformar pagamentos em despesas.
 
@@ -210,7 +292,7 @@ então uma despesa paga é criada ou atualizada e o saldo da conta é reduzido.
 
 Prioridade: P1.
 
-## 8. Orçamentos
+## 9. Orçamentos
 
 Objetivo: controlar limites mensais por categoria.
 
@@ -230,7 +312,7 @@ então o orçamento deve indicar limite excedido.
 
 Prioridade: P1.
 
-## 9. Metas financeiras
+## 10. Metas financeiras
 
 Objetivo: acompanhar objetivos financeiros.
 
@@ -250,7 +332,7 @@ então o percentual de conclusão é recalculado.
 
 Prioridade: P1.
 
-## 10. Cartões de crédito
+## 11. Cartões de crédito
 
 Objetivo: controlar cartões, limites e compras.
 
@@ -270,7 +352,7 @@ então ele aparece na minha lista com limite total, utilizado e disponível.
 
 Prioridade: P1.
 
-## 11. Faturas de cartão
+## 12. Faturas de cartão
 
 Objetivo: agrupar compras por competência e permitir pagamento.
 
@@ -301,7 +383,7 @@ então o sistema bloqueia o pagamento duplicado.
 
 Prioridade: P1.
 
-## 12. Compras parceladas
+## 13. Compras parceladas
 
 Objetivo: registrar compras no cartão e gerar parcelas automaticamente.
 
@@ -332,7 +414,7 @@ então o sistema deve bloquear a edição.
 
 Prioridade: P1.
 
-## 13. Dashboard
+## 14. Dashboard
 
 Objetivo: apresentar visão financeira inicial.
 
@@ -352,7 +434,7 @@ então vejo saldo total, receitas, despesas, faturas e gráficos do período.
 
 Prioridade: P1.
 
-## 14. Relatórios
+## 15. Relatórios
 
 Objetivo: permitir análise financeira básica.
 
@@ -372,7 +454,7 @@ então vejo os totais agrupados por categoria apenas com meus dados.
 
 Prioridade: P2.
 
-## 15. Testes
+## 16. Testes
 
 Objetivo: garantir regras críticas e isolamento de dados.
 
@@ -401,7 +483,7 @@ então nenhum endpoint retorna dados de outro usuário.
 
 Prioridade: P0 contínua.
 
-## 16. Deploy
+## 17. Deploy
 
 Objetivo: disponibilizar ambiente executável.
 

@@ -9,6 +9,8 @@ import { FormField } from '../../../shared/ui/FormField';
 import { AuthCard } from '../components/AuthCard';
 import { useAuth } from '../hooks/useAuth';
 import { loginSchema, type LoginFormData } from '../schemas/auth.schemas';
+import type { ApiErrorResponse } from '../types/auth.types';
+import { accountStatusPath } from '../utils/account-status';
 
 type LoginLocationState = {
   from?: {
@@ -44,7 +46,23 @@ export function LoginPage() {
       const state = location.state as LoginLocationState | null;
       navigate(state?.from?.pathname ?? '/dashboard', { replace: true });
     } catch (error) {
-      const message = error instanceof AxiosError ? error.response?.data?.message : null;
+      if (error instanceof AxiosError && error.response?.status === 403) {
+        const data = error.response.data as ApiErrorResponse;
+        const statusPath = accountStatusPath(data.userStatus);
+
+        if (statusPath) {
+          navigate(statusPath, {
+            replace: true,
+            state: {
+              email: parsed.data.email,
+              message: data.message,
+            },
+          });
+          return;
+        }
+      }
+
+      const message = error instanceof AxiosError ? (error.response?.data as ApiErrorResponse | undefined)?.message : null;
       setSubmitError(message ?? 'E-mail ou senha invalidos.');
     }
   }
@@ -58,7 +76,7 @@ export function LoginPage() {
             Esqueci minha senha
           </Link>
           <Link className="font-semibold text-fuchsia-700 hover:text-fuchsia-600" to="/register">
-            Criar conta
+            Solicitar acesso
           </Link>
         </div>
       }

@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router';
 
+import { AccountStatusPage } from '../../features/auth/pages/AccountStatusPage';
 import { ForgotPasswordPage } from '../../features/auth/pages/ForgotPasswordPage';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterPage } from '../../features/auth/pages/RegisterPage';
@@ -15,6 +16,10 @@ export function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/account-status/pending" element={<AccountStatusPage status="PENDING_APPROVAL" />} />
+        <Route path="/account-status/suspended" element={<AccountStatusPage status="SUSPENDED" />} />
+        <Route path="/account-status/rejected" element={<AccountStatusPage status="REJECTED" />} />
+        <Route path="/account-status/unavailable" element={<AccountStatusPage status="DELETED" />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>

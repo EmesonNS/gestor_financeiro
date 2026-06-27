@@ -22,7 +22,10 @@ import com.zorysa.finance.users.repository.UserRepository;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -53,7 +56,7 @@ class AuthApiContractIntegrationTest {
     private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Test
-    void shouldRegisterUserAndReturnCreatedUser() throws Exception {
+    void shouldRequestRegistrationAndReturnPendingApprovalWithoutTokens() throws Exception {
         when(authService.register(any(RegisterRequest.class)))
                 .thenReturn(new UserResponse(USER_ID, "Maria", "maria@email.com", Instant.parse("2026-06-25T10:00:00Z")));
 
@@ -69,7 +72,11 @@ class AuthApiContractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(USER_ID.toString()))
                 .andExpect(jsonPath("$.name").value("Maria"))
-                .andExpect(jsonPath("$.email").value("maria@email.com"));
+                .andExpect(jsonPath("$.email").value("maria@email.com"))
+                .andExpect(jsonPath("$.status").value("PENDING_APPROVAL"))
+                .andExpect(jsonPath("$.message").value("Cadastro enviado para aprovação."))
+                .andExpect(jsonPath("$.accessToken").doesNotExist())
+                .andExpect(jsonPath("$.refreshToken").doesNotExist());
     }
 
     @Test
@@ -102,7 +109,36 @@ class AuthApiContractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken", not(blankOrNullString())))
                 .andExpect(jsonPath("$.refreshToken", not(blankOrNullString())))
-                .andExpect(jsonPath("$.expiresIn").value(900));
+                .andExpect(jsonPath("$.expiresIn").value(900))
+                .andExpect(jsonPath("$.user.id").value(USER_ID.toString()))
+                .andExpect(jsonPath("$.user.name").value("Maria"))
+                .andExpect(jsonPath("$.user.email").value("maria@email.com"))
+                .andExpect(jsonPath("$.user.role").value("USER"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "PENDING_APPROVAL, ACCOUNT_PENDING_APPROVAL, Sua conta está aguardando aprovação.",
+            "SUSPENDED, ACCOUNT_SUSPENDED, Sua conta está suspensa.",
+            "REJECTED, ACCOUNT_REJECTED, Seu cadastro foi negado.",
+            "DELETED, ACCOUNT_DELETED, Esta conta não está disponível."
+    })
+    void shouldReturnForbiddenWithCodeAndUserStatusWhenLoginUserIsBlocked(String userStatus, String code, String message) throws Exception {
+        when(authService.login(any(LoginRequest.class)))
+                .thenThrow(new AccountStatusAccessDeniedException(message, code, userStatus));
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  \"email\": \"maria@email.com\",
+                                  \"password\": \"secret123\"
+                                }
+                                """))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value(message))
+                .andExpect(jsonPath("$.code").value(code))
+                .andExpect(jsonPath("$.userStatus").value(userStatus));
     }
 
     @Test
@@ -190,5 +226,24 @@ class AuthApiContractIntegrationTest {
                 .andExpect(status().isNoContent());
 
         verify(authService).resetPassword(any());
+    }
+    private static class AccountStatusAccessDeniedException extends AccessDeniedException {
+
+        private final String code;
+        private final String userStatus;
+
+        AccountStatusAccessDeniedException(String message, String code, String userStatus) {
+            super(message);
+            this.code = code;
+            this.userStatus = userStatus;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String getUserStatus() {
+            return userStatus;
+        }
     }
 }

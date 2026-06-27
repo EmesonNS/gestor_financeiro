@@ -2,10 +2,15 @@ import { useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router';
 
 import { useAuth } from '../../features/auth/hooks/useAuth';
+import type { UserRole } from '../../features/auth/types/auth.types';
 
-export function ProtectedRoute() {
+type ProtectedRouteProps = {
+  requiredRole?: UserRole;
+};
+
+export function ProtectedRoute({ requiredRole }: ProtectedRouteProps) {
   const location = useLocation();
-  const { isAuthenticated, restoreSession, status } = useAuth();
+  const { isAuthenticated, restoreSession, status, user } = useAuth();
 
   useEffect(() => {
     if (status === 'checking') {
@@ -23,6 +28,10 @@ export function ProtectedRoute() {
 
   if (!isAuthenticated) {
     return <Navigate replace state={{ from: location }} to="/login" />;
+  }
+
+  if (requiredRole && user?.role !== requiredRole) {
+    return <Navigate replace to="/dashboard" />;
   }
 
   return <Outlet />;

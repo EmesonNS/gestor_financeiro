@@ -9,6 +9,18 @@ public record ApiErrorResponse(
         String error,
         String message,
         String path,
+        String code,
+        String userStatus,
         List<String> details
 ) {
+    public ApiErrorResponse(
+            Instant timestamp,
+            int status,
+            String error,
+            String message,
+            String path,
+            List<String> details
+    ) {
+        this(timestamp, status, error, message, path, null, null, details);
+    }
 }

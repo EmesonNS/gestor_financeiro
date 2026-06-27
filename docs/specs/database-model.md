@@ -25,6 +25,9 @@
 - `invoice_status`: `OPEN`, `CLOSED`, `PAID`, `OVERDUE`.
 - `purchase_status`: `ACTIVE`, `CANCELED`.
 - `installment_status`: `OPEN`, `PAID`, `CANCELED`.
+- `user_role`: `USER`, `ADMIN`.
+- `user_status`: `PENDING_APPROVAL`, `APPROVED`, `REJECTED`, `SUSPENDED`, `DELETED`.
+- `user_status_action`: `REGISTERED`, `APPROVED`, `REJECTED`, `SUSPENDED`, `REACTIVATED`, `DELETED`.
 
 ## users
 
@@ -36,6 +39,12 @@ Descrição: usuários do sistema.
 | name | varchar(120) | not null |
 | email | varchar(180) | not null, unique |
 | password_hash | varchar(255) | not null |
+| role | user_role | not null default USER |
+| status | user_status | not null default PENDING_APPROVAL |
+| approved_at | timestamptz | nullable |
+| rejected_at | timestamptz | nullable |
+| suspended_at | timestamptz | nullable |
+| deleted_at | timestamptz | nullable |
 | created_at | timestamptz | not null |
 | updated_at | timestamptz | not null |
 | active | boolean | not null default true |
@@ -43,6 +52,34 @@ Descrição: usuários do sistema.
 Índices:
 
 - `ux_users_email` unique em `email`.
+- `ix_users_status` em `status`.
+- `ix_users_role` em `role`.
+
+Observações:
+
+- Cadastro público cria usuário com `status = PENDING_APPROVAL`.
+- Apenas usuários `APPROVED` podem acessar o sistema financeiro.
+- Admins devem possuir `role = ADMIN`.
+- Suspensão, negação e exclusão/desativação bloqueiam login normal.
+
+## user_status_history
+
+Descrição: auditoria de decisões administrativas sobre usuários.
+
+| Campo | Tipo | Regras |
+|---|---|---|
+| id | uuid | PK |
+| user_id | uuid | FK users(id), not null |
+| admin_user_id | uuid | FK users(id), nullable para evento automático de cadastro |
+| previous_status | user_status | nullable |
+| new_status | user_status | not null |
+| action | user_status_action | not null |
+| reason | text | nullable |
+| created_at | timestamptz | not null |
+
+Índices: `(user_id, created_at)`, `(admin_user_id, created_at)`, `(new_status)`.
+
+Observações: toda aprovação, negação, suspensão, reativação e exclusão/desativação deve gerar registro.
 
 ## accounts
 

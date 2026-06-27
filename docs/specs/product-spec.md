@@ -4,6 +4,8 @@
 
 Sistema web de organização financeira pessoal, multiusuário com isolamento total de dados por usuário. Cada pessoa terá cadastro, autenticação, contas, categorias, transações, contas a pagar, cartões, faturas, parcelamentos, orçamentos, metas, dashboard e relatórios próprios.
 
+O sistema também deve ter uma visão administrativa. Novos cadastros não liberam acesso imediatamente: eles ficam com status pendente até que um administrador aprove a conta. O administrador pode aprovar, negar, suspender, reativar ou excluir/desativar usuários.
+
 Na primeira versão não existe grupo financeiro, convite, compartilhamento, divisão de despesas, reembolso ou visualização de dados de outro usuário.
 
 ## 2. Objetivo
@@ -23,6 +25,8 @@ O sistema reduz a dispersão de informações financeiras em planilhas, aplicati
 ## 5. Escopo do MVP
 
 - Autenticação, recuperação e alteração de senha.
+- Aprovação administrativa de novos usuários.
+- Painel administrativo básico de usuários.
 - Perfil básico do usuário.
 - Contas financeiras.
 - Categorias de receitas e despesas.
@@ -50,26 +54,57 @@ O sistema reduz a dispersão de informações financeiras em planilhas, aplicati
 
 ## 7. Principais jornadas do usuário
 
-1. Criar conta, fazer login e acessar área privada.
-2. Cadastrar contas financeiras com saldo inicial.
-3. Criar categorias personalizadas ou usar categorias padrão sugeridas.
-4. Registrar receitas e despesas pagas ou pendentes.
-5. Cadastrar contas a pagar e marcar pagamentos.
-6. Criar orçamento mensal por categoria e acompanhar consumo.
-7. Criar metas financeiras e atualizar progresso.
-8. Cadastrar cartão, registrar compras e acompanhar faturas.
-9. Pagar fatura usando uma conta financeira.
-10. Consultar dashboard e relatórios por período.
+1. Solicitar cadastro e aguardar aprovação do administrador.
+2. Administrador revisa usuários pendentes e aprova ou nega a criação da conta.
+3. Usuário aprovado faz login e acessa área privada.
+4. Cadastrar contas financeiras com saldo inicial.
+5. Criar categorias personalizadas ou usar categorias padrão sugeridas.
+6. Registrar receitas e despesas pagas ou pendentes.
+7. Cadastrar contas a pagar e marcar pagamentos.
+8. Criar orçamento mensal por categoria e acompanhar consumo.
+9. Criar metas financeiras e atualizar progresso.
+10. Cadastrar cartão, registrar compras e acompanhar faturas.
+11. Pagar fatura usando uma conta financeira.
+12. Consultar dashboard e relatórios por período.
 
 ## 8. Requisitos funcionais por módulo
 
 ### Autenticação e perfil
 
-- Permitir cadastro com nome, e-mail e senha.
-- Permitir login, logout, refresh token, recuperação e redefinição de senha.
+- Permitir solicitação de cadastro com nome, e-mail e senha.
+- Criar novos cadastros com status `PENDING_APPROVAL`.
+- Impedir acesso normal de usuários pendentes, negados ou suspensos.
+- Permitir login, logout, refresh token, recuperação e redefinição de senha apenas para usuários aptos conforme status.
 - Gerar e validar JWT para rotas privadas.
 - Permitir visualizar e editar perfil básico.
 - Permitir alteração de senha mediante senha atual ou fluxo seguro equivalente.
+
+
+### Administração de usuários
+
+- Exibir painel administrativo separado da área financeira comum.
+- Listar usuários por status: pendente, aprovado, negado, suspenso e excluído/inativo.
+- Exibir dados básicos da solicitação: nome, e-mail, data da solicitação, status atual e datas de decisão.
+- Aprovar criação de conta pendente.
+- Negar criação de conta pendente.
+- Aprovar posteriormente um usuário que havia sido negado.
+- Suspender usuário já aprovado.
+- Reativar usuário suspenso.
+- Excluir ou desativar usuário, conforme política segura do sistema.
+- Alterar livremente o status administrativo do usuário, respeitando regras de auditoria.
+- Registrar qual admin executou a decisão e quando.
+- Bloquear acesso financeiro de usuários pendentes, negados, suspensos ou excluídos.
+- Impedir que administradores acessem dados financeiros pessoais dos usuários no MVP, salvo se uma funcionalidade futura de suporte/auditoria for aprovada explicitamente.
+
+Funcionalidades administrativas interessantes para evolução:
+
+- Histórico de decisões administrativas por usuário.
+- Filtros e busca por nome, e-mail, status e data.
+- Motivo obrigatório ao negar, suspender ou excluir.
+- Tela de métricas operacionais: usuários pendentes, aprovados, suspensos e cadastros por mês.
+- Registro de último login.
+- Notificação visual de novos cadastros pendentes.
+- Exportação de lista de usuários para auditoria.
 
 ### Contas financeiras
 
@@ -174,6 +209,12 @@ O sistema reduz a dispersão de informações financeiras em planilhas, aplicati
 ## 10. Regras de negócio gerais
 
 - O usuário autenticado é sempre o dono dos dados criados.
+- O cadastro de usuário não libera acesso automaticamente.
+- O usuário só acessa o sistema financeiro quando seu status for `APPROVED`.
+- Admin pode alterar status do usuário entre pendente, aprovado, negado, suspenso e excluído/inativo.
+- Usuário suspenso perde acesso às rotas privadas até reativação.
+- Ações administrativas devem ser auditáveis.
+- Admin não deve visualizar dados financeiros pessoais dos usuários no MVP.
 - O sistema nunca deve aceitar `userId` livre no corpo de criação de dados financeiros.
 - Nenhuma consulta financeira pode retornar dados de outro usuário.
 - Exclusões de entidades usadas por histórico financeiro devem ser restritas, arquivadas ou validadas.
@@ -185,6 +226,10 @@ O sistema reduz a dispersão de informações financeiras em planilhas, aplicati
 ## 11. Critérios de aceite gerais
 
 - Dado que dois usuários existem, quando um consulta qualquer listagem privada, então somente seus próprios dados são retornados.
+- Dado que um novo usuário solicita cadastro, quando o cadastro é enviado, então a conta fica pendente e não permite acesso financeiro.
+- Dado que um admin aprova uma conta pendente, quando o usuário faz login, então ele acessa normalmente o sistema.
+- Dado que um admin nega ou suspende uma conta, quando o usuário tenta acessar, então o sistema bloqueia o acesso e exibe uma tela explicando o status da conta.
+- Dado que um admin altera uma conta negada para aprovada, quando o usuário faz login, então o acesso passa a ser permitido.
 - Dado que estou autenticado, quando crio uma despesa paga vinculada a uma conta, então o saldo da conta é reduzido.
 - Dado que registro compra no cartão, quando consulto saldo da conta, então o saldo não muda até a fatura ser paga.
 - Dado que pago uma fatura com uma conta, quando consulto a conta, então o saldo é reduzido pelo total da fatura.
@@ -205,3 +250,5 @@ O sistema reduz a dispersão de informações financeiras em planilhas, aplicati
 - Parcela: parte de uma compra parcelada associada a uma fatura.
 - Saldo realizado: saldo considerando apenas movimentações efetivadas.
 - Saldo previsto: saldo considerando pendências futuras.
+- Admin: usuário com permissão administrativa para controlar acesso de outros usuários ao sistema.
+- Status do usuário: estado administrativo que define se a conta pode acessar o sistema.

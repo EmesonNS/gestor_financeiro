@@ -2,6 +2,7 @@ package com.zorysa.finance.auth.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -24,9 +25,11 @@ import com.zorysa.finance.shared.exception.UnauthorizedException;
 import com.zorysa.finance.users.dto.UserResponse;
 import com.zorysa.finance.users.entity.User;
 import com.zorysa.finance.users.service.UserService;
+import java.lang.reflect.Field;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,8 +38,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.ReflectionUtils;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -84,7 +89,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void shouldRegisterUserAndReturnPublicUserResponse() {
+    void shouldRegisterUserAsPendingApprovalAndReturnApprovalMessage() {
         RegisterRequest request = new RegisterRequest("Maria", "maria@email.com", "secret123");
         UserResponse expectedResponse = new UserResponse(USER_ID, "Maria", "maria@email.com", NOW.minusSeconds(60));
         when(userService.createUserResponse("Maria", "maria@email.com", "secret123")).thenReturn(expectedResponse);
@@ -92,6 +97,16 @@ class AuthServiceTest {
         UserResponse response = authService.register(request);
 
         assertThat(response).isEqualTo(expectedResponse);
+        assertThat(ReflectionUtils.findField(UserResponse.class, "status"))
+                .as("UserResponse deve expor status do cadastro conforme contrato de /api/auth/register")
+                .isNotNull();
+        assertThat(ReflectionUtils.findField(UserResponse.class, "message"))
+                .as("UserResponse deve expor mensagem de aprovação conforme contrato de /api/auth/register")
+                .isNotNull();
+        assertThat(response)
+                .extracting("status", "message")
+                .containsExactly("PENDING_APPROVAL", "Cadastro enviado para aprovação.");
+        verify(refreshTokenRepository, never()).save(any());
     }
 
     @Test
@@ -135,6 +150,39 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(new LoginRequest("maria@email.com", "wrong")))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("Credenciais invalidas");
+
+        verify(refreshTokenRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectLoginWhenUserIsPendingApproval() {
+        setAdministrativeStatus(user, "PENDING_APPROVAL");
+        when(userService.findActiveByEmail("maria@email.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("secret123", "stored-password-hash")).thenReturn(true);
+
+        Throwable error = catchThrowable(() -> authService.login(new LoginRequest("maria@email.com", "secret123")));
+
+        assertAccountStatusDenied(error, "PENDING_APPROVAL", "ACCOUNT_PENDING_APPROVAL", "Sua conta está aguardando aprovação.");
+        verify(refreshTokenRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectLoginWhenUserIsRejectedSuspendedOrDeleted() {
+        Map<String, String[]> expectedErrors = Map.of(
+                "REJECTED", new String[]{"ACCOUNT_REJECTED", "Seu cadastro foi negado."},
+                "SUSPENDED", new String[]{"ACCOUNT_SUSPENDED", "Sua conta está suspensa."},
+                "DELETED", new String[]{"ACCOUNT_DELETED", "Esta conta não está disponível."}
+        );
+
+        expectedErrors.forEach((status, expected) -> {
+            User blockedUser = userWithStatus(status);
+            when(userService.findActiveByEmail(status.toLowerCase() + "@email.com")).thenReturn(Optional.of(blockedUser));
+            when(passwordEncoder.matches("secret123", "stored-password-hash")).thenReturn(true);
+
+            Throwable error = catchThrowable(() -> authService.login(new LoginRequest(status.toLowerCase() + "@email.com", "secret123")));
+
+            assertAccountStatusDenied(error, status, expected[0], expected[1]);
+        });
 
         verify(refreshTokenRepository, never()).save(any());
     }
@@ -237,5 +285,51 @@ class AuthServiceTest {
                 .hasMessage("Token de redefinicao invalido");
 
         verify(userService, never()).updatePassword(any(), any());
+    }
+
+    private void assertAccountStatusDenied(Throwable error, String userStatus, String code, String message) {
+        assertThat(error)
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage(message);
+        assertThat(readStringMember(error, "code"))
+                .as("excecao de bloqueio administrativo deve expor code para o front-end")
+                .isEqualTo(code);
+        assertThat(readStringMember(error, "userStatus"))
+                .as("excecao de bloqueio administrativo deve expor userStatus para o front-end")
+                .isEqualTo(userStatus);
+    }
+
+    private String readStringMember(Throwable error, String name) {
+        try {
+            return (String) error.getClass().getMethod(name).invoke(error);
+        } catch (ReflectiveOperationException ignored) {
+            try {
+                return (String) error.getClass().getMethod("get" + Character.toUpperCase(name.charAt(0)) + name.substring(1)).invoke(error);
+            } catch (ReflectiveOperationException exception) {
+                Field field = ReflectionUtils.findField(error.getClass(), name);
+                assertThat(field)
+                        .as("excecao de bloqueio administrativo deve expor " + name)
+                        .isNotNull();
+                ReflectionUtils.makeAccessible(field);
+                return (String) ReflectionUtils.getField(field, error);
+            }
+        }
+    }
+
+    private User userWithStatus(String status) {
+        User blockedUser = new User("Maria", status.toLowerCase() + "@email.com", "stored-password-hash");
+        ReflectionTestUtils.setField(blockedUser, "id", UUID.nameUUIDFromBytes(status.getBytes()));
+        setAdministrativeStatus(blockedUser, status);
+        return blockedUser;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void setAdministrativeStatus(User target, String status) {
+        Field field = ReflectionUtils.findField(User.class, "status");
+        assertThat(field)
+                .as("User deve expor o status administrativo exigido pelos requisitos de autenticação")
+                .isNotNull();
+        Object value = field.getType().isEnum() ? Enum.valueOf((Class<? extends Enum>) field.getType(), status) : status;
+        ReflectionTestUtils.setField(target, "status", value);
     }
 }

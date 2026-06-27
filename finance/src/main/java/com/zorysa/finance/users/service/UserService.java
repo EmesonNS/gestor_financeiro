@@ -36,6 +36,7 @@ public class UserService {
             throw new ConflictException("E-mail ja cadastrado");
         }
         User user = new User(name.trim(), normalizedEmail, passwordEncoder.encode(password));
+        user.markPendingApproval();
         return userRepository.save(user);
     }
 
