@@ -12,6 +12,8 @@ import { CategoriesPage } from '../../features/categories/pages/CategoriesPage';
 import { CategoryFormPage } from '../../features/categories/pages/CategoryFormPage';
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
 import { ProfilePage } from '../../features/profile/pages/ProfilePage';
+import { TransactionFormPage } from '../../features/transactions/pages/TransactionFormPage';
+import { TransactionsPage } from '../../features/transactions/pages/TransactionsPage';
 import { AppLayout } from '../../shared/layouts/AppLayout';
 import { AuthLayout } from '../../shared/layouts/AuthLayout';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -39,6 +41,9 @@ export function AppRoutes() {
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/categories/new" element={<CategoryFormPage />} />
           <Route path="/categories/:id/edit" element={<CategoryFormPage />} />
+          <Route path="/transactions" element={<TransactionsPage />} />
+          <Route path="/transactions/new" element={<TransactionFormPage />} />
+          <Route path="/transactions/:id/edit" element={<TransactionFormPage />} />
         </Route>
       </Route>
 

@@ -122,4 +122,8 @@ public class Account {
     public void archive() {
         this.archived = true;
     }
+
+    public void applyBalanceImpact(BigDecimal impact) {
+        this.currentBalance = this.currentBalance.add(impact);
+    }
 }
