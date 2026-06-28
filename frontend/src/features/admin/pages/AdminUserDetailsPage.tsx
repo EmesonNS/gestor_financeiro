@@ -37,15 +37,15 @@ export function AdminUserDetailsPage() {
   }
 
   if (userQuery.isLoading) {
-    return <div className="rounded-lg border border-fuchsia-100 bg-white p-8 text-center text-sm font-medium text-slate-600">Carregando detalhes...</div>;
+    return <div className="app-panel-muted p-8 text-center text-sm font-medium text-fuchsia-50">Carregando detalhes...</div>;
   }
 
   if (userQuery.isError || !user) {
     return (
-      <section className="rounded-lg border border-rose-200 bg-rose-50 p-6">
-        <h1 className="font-serif text-2xl font-semibold text-rose-900">Usuario nao encontrado</h1>
-        <p className="mt-2 text-sm text-rose-700">Nao foi possivel carregar os detalhes administrativos deste usuario.</p>
-        <Link className="mt-4 inline-flex font-semibold text-rose-800" to="/admin/users">
+      <section className="rounded-lg border border-rose-300/25 bg-rose-400/10 p-6">
+        <h1 className="font-serif text-2xl font-semibold text-rose-100">Usuario nao encontrado</h1>
+        <p className="mt-2 text-sm text-rose-200">Nao foi possivel carregar os detalhes administrativos deste usuario.</p>
+        <Link className="mt-4 inline-flex font-semibold text-rose-100" to="/admin/users">
           Voltar para usuarios
         </Link>
       </section>
@@ -58,7 +58,7 @@ export function AdminUserDetailsPage() {
         <ArrowLeft size={16} /> Voltar para usuarios
       </Link>
 
-      <div className="rounded-lg border border-white/70 bg-white/95 p-6 shadow-2xl shadow-fuchsia-950/15 backdrop-blur">
+      <div className="app-panel p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-3">
@@ -82,7 +82,7 @@ export function AdminUserDetailsPage() {
             <div className="flex flex-wrap justify-end gap-2">
               {commands.map((item) => (
                 <Button
-                  className={`min-h-9 px-3 py-1.5 ${item === 'reject' || item === 'suspend' || item === 'delete' ? 'border-rose-200 text-rose-700 hover:bg-rose-50' : ''}`}
+                  className={`min-h-9 px-3 py-1.5 ${item === 'reject' || item === 'suspend' || item === 'delete' ? 'border-rose-300/25 text-rose-200 hover:bg-rose-400/10' : ''}`}
                   key={item}
                   onClick={() => setCommand(item)}
                   type="button"
@@ -95,11 +95,11 @@ export function AdminUserDetailsPage() {
           ) : null}
         </div>
 
-        {actionError ? <p className="mt-5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{actionError}</p> : null}
+        {actionError ? <p className="mt-5 rounded-lg border border-rose-300/25 bg-rose-400/10 px-4 py-3 text-sm font-medium text-rose-200">{actionError}</p> : null}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-        <section className="rounded-lg border border-white/70 bg-white/95 p-5 shadow-xl shadow-fuchsia-950/10 backdrop-blur">
+        <section className="app-panel p-5">
           <h2 className="font-serif text-2xl font-semibold text-slate-950">Datas de decisao</h2>
           <dl className="mt-5 grid gap-4 text-sm">
             <div>
@@ -121,7 +121,7 @@ export function AdminUserDetailsPage() {
           </dl>
         </section>
 
-        <section className="rounded-lg border border-white/70 bg-white/95 p-5 shadow-xl shadow-fuchsia-950/10 backdrop-blur">
+        <section className="app-panel p-5">
           <h2 className="font-serif text-2xl font-semibold text-slate-950">Historico administrativo</h2>
           {user.statusHistory.length ? (
             <ol className="admin-timeline mt-5 space-y-4">
@@ -139,7 +139,7 @@ export function AdminUserDetailsPage() {
               ))}
             </ol>
           ) : (
-            <p className="mt-4 rounded-lg border border-dashed border-fuchsia-200 bg-fuchsia-50 px-4 py-5 text-sm text-slate-600">
+            <p className="mt-4 rounded-lg border border-dashed border-white/15 bg-white/10 px-4 py-5 text-sm text-[#c8a9d8]">
               Ainda nao ha decisoes registradas para este usuario.
             </p>
           )}

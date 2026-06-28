@@ -176,6 +176,10 @@ public class User {
         active = false;
     }
 
+    public void updateName(String name) {
+        this.name = name;
+    }
+
     public void updatePasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }

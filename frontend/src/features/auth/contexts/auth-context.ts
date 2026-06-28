@@ -13,6 +13,7 @@ export type AuthContextValue = {
   register: (payload: RegisterRequest) => Promise<UserResponse>;
   restoreSession: () => Promise<void>;
   status: AuthStatus;
+  updateAuthenticatedUser: (user: Partial<AuthenticatedUser>) => void;
   user: AuthenticatedUser | null;
 };
 

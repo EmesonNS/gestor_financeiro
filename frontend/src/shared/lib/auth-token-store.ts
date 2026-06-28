@@ -38,9 +38,13 @@ export function setAuthTokens(tokens: { accessToken: string; refreshToken: strin
   window.sessionStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
 
   if (tokens.user) {
-    authUser = tokens.user;
-    window.sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(tokens.user));
+    setAuthUser(tokens.user);
   }
+}
+
+export function setAuthUser(user: AuthSessionUser) {
+  authUser = user;
+  window.sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
 }
 
 export function clearAuthTokens() {

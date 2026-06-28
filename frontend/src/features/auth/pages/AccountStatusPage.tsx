@@ -52,10 +52,10 @@ export function AccountStatusPage({ status }: AccountStatusPageProps) {
       eyebrow={content.eyebrow}
       footer={
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link className="font-semibold text-fuchsia-700 hover:text-fuchsia-600" to="/login">
+          <Link className="font-semibold text-fuchsia-300 hover:text-fuchsia-200" to="/login">
             Voltar para login
           </Link>
-          <Link className="font-semibold text-fuchsia-700 hover:text-fuchsia-600" to="/register">
+          <Link className="font-semibold text-fuchsia-300 hover:text-fuchsia-200" to="/register">
             Solicitar outro cadastro
           </Link>
         </div>
@@ -63,13 +63,13 @@ export function AccountStatusPage({ status }: AccountStatusPageProps) {
       title={content.title}
     >
       <div className="space-y-5">
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-fuchsia-100 text-fuchsia-700">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-white/10 bg-fuchsia-400/15 text-fuchsia-200">
           <Icon size={24} />
         </div>
-        <p className="text-sm leading-6 text-slate-600">{state?.message ?? content.description}</p>
+        <p className="text-sm leading-6 text-[#c8a9d8]">{state?.message ?? content.description}</p>
         {state?.email ? (
-          <div className="rounded-lg border border-fuchsia-100 bg-fuchsia-50 px-4 py-3 text-sm text-slate-700">
-            Solicitacao vinculada a <strong className="text-slate-950">{state.email}</strong>.
+          <div className="rounded-lg border border-white/10 bg-white/10 px-4 py-3 text-sm text-[#c8a9d8]">
+            Solicitacao vinculada a <strong className="text-[#f7ecff]">{state.email}</strong>.
           </div>
         ) : null}
         <Button className="w-full" type="button" variant="secondary">

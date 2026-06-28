@@ -52,18 +52,18 @@ export function AdminUsersPage() {
 
   return (
     <section className="space-y-6">
-      <div className="relative overflow-hidden rounded-lg border border-white/10 bg-white/10 p-6 shadow-2xl shadow-fuchsia-950/20 backdrop-blur">
+      <div className="app-page-hero">
         <div className="admin-flow-line" aria-hidden="true" />
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-fuchsia-200">Administracao</p>
-            <h1 className="mt-3 font-serif text-4xl font-semibold leading-tight text-white">Usuarios e aprovacoes</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-fuchsia-50/80">
+            <p className="app-eyebrow">Administracao</p>
+            <h1 className="app-hero-title mt-4">Usuarios e aprovacoes</h1>
+            <p className="app-hero-copy mt-4 max-w-2xl">
             Controle quem pode entrar no sistema, aprove cadastros pendentes e registre decisoes administrativas.
             </p>
           </div>
 
-          <div className="grid min-w-48 rounded-lg border border-white/15 bg-white/10 p-4 text-white shadow-sm shadow-fuchsia-950/20 backdrop-blur">
+          <div className="app-panel-muted grid min-w-48 p-4">
             <span className="inline-flex items-center gap-2 text-sm font-medium text-fuchsia-50/85">
               <SearchCheck size={17} /> Pendentes nesta pagina
             </span>
@@ -88,7 +88,7 @@ export function AdminUsersPage() {
         <label className="flex items-center gap-2 text-sm font-medium text-fuchsia-50">
           Status
           <select
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-fuchsia-500 focus:ring-4 focus:ring-fuchsia-100"
+            className="rounded-lg border border-[#5a3a6e] bg-[#24112f] px-3 py-2 text-sm text-[#f7ecff] outline-none focus:border-fuchsia-400 focus:ring-4 focus:ring-fuchsia-500/20"
             onChange={(event) => setStatusFilter(event.target.value as 'ALL' | AdminUser['status'])}
             value={statusFilter}
           >
@@ -102,14 +102,14 @@ export function AdminUsersPage() {
         </label>
       </div>
 
-      {actionError ? <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{actionError}</p> : null}
+      {actionError ? <p className="rounded-lg border border-rose-300/25 bg-rose-400/10 px-4 py-3 text-sm font-medium text-rose-200">{actionError}</p> : null}
 
       {usersQuery.isLoading ? (
         <div className="rounded-lg border border-white/10 bg-white/10 p-8 text-center text-sm font-medium text-fuchsia-50 backdrop-blur">Carregando usuarios...</div>
       ) : null}
 
       {usersQuery.isError ? (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 p-6 text-sm font-medium text-rose-700">
+        <div className="rounded-lg border border-rose-300/25 bg-rose-400/10 p-6 text-sm font-medium text-rose-200">
           Nao foi possivel carregar usuarios. Tente novamente em alguns instantes.
         </div>
       ) : null}

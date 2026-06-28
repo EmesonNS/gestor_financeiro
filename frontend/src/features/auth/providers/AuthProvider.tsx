@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useCallback, useMemo, useState, type PropsWithChildren } from 'react';
 
-import { clearAuthTokens, getAccessToken, getAuthUser, getRefreshToken } from '../../../shared/lib/auth-token-store';
+import { clearAuthTokens, getAccessToken, getAuthUser, getRefreshToken, setAuthUser } from '../../../shared/lib/auth-token-store';
 import { AuthContext, type AuthContextValue, type AuthStatus } from '../contexts/auth-context';
 import { authService } from '../services/auth.service';
 import type { AuthenticatedUser, ForgotPasswordRequest, LoginRequest, RegisterRequest } from '../types/auth.types';
@@ -63,6 +63,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
   }, []);
 
+  const updateAuthenticatedUser = useCallback((partialUser: Partial<AuthenticatedUser>) => {
+    setUser((currentUser) => {
+      if (!currentUser) {
+        return currentUser;
+      }
+
+      const nextUser = { ...currentUser, ...partialUser };
+      setAuthUser(nextUser);
+      return nextUser;
+    });
+  }, []);
+
   const value = useMemo<AuthContextValue>(() => ({
     forgotPassword,
     isAdmin: user?.role === 'ADMIN',
@@ -72,8 +84,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
     register,
     restoreSession,
     status,
+    updateAuthenticatedUser,
     user,
-  }), [forgotPassword, login, logout, register, restoreSession, status, user]);
+  }), [forgotPassword, login, logout, register, restoreSession, status, updateAuthenticatedUser, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

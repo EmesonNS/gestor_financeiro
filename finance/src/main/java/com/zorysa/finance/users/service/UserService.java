@@ -1,12 +1,16 @@
 package com.zorysa.finance.users.service;
 
 import com.zorysa.finance.shared.exception.ConflictException;
+import com.zorysa.finance.shared.exception.UnauthorizedException;
+import com.zorysa.finance.users.dto.ChangePasswordRequest;
+import com.zorysa.finance.users.dto.UpdateUserProfileRequest;
 import com.zorysa.finance.users.dto.UserResponse;
 import com.zorysa.finance.users.entity.User;
 import com.zorysa.finance.users.mapper.UserMapper;
 import com.zorysa.finance.users.repository.UserRepository;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +48,34 @@ public class UserService {
     public Optional<User> findActiveByEmail(String email) {
         return userRepository.findByEmailIgnoreCase(normalizeEmail(email))
                 .filter(User::isActive);
+    }
+
+
+    @Transactional(readOnly = true)
+    public UserResponse getAuthenticatedProfile(UUID authenticatedUserId) {
+        return userMapper.toResponse(findActiveById(authenticatedUserId));
+    }
+
+    @Transactional
+    public UserResponse updateAuthenticatedProfile(UUID authenticatedUserId, UpdateUserProfileRequest request) {
+        User user = findActiveById(authenticatedUserId);
+        user.updateName(request.name().trim());
+        return userMapper.toResponse(userRepository.save(user));
+    }
+
+    @Transactional
+    public void changeAuthenticatedPassword(UUID authenticatedUserId, ChangePasswordRequest request) {
+        User user = findActiveById(authenticatedUserId);
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
+            throw new UnauthorizedException("Senha atual invalida");
+        }
+        updatePassword(user, request.newPassword());
+    }
+
+    private User findActiveById(UUID userId) {
+        return userRepository.findById(userId)
+                .filter(User::isActive)
+                .orElseThrow(() -> new UnauthorizedException("Usuario nao autenticado"));
     }
 
     @Transactional

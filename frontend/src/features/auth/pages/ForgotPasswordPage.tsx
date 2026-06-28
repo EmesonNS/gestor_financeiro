@@ -45,20 +45,20 @@ export function ForgotPasswordPage() {
     <AuthCard
       eyebrow="Recuperacao"
       footer={
-        <Link className="font-semibold text-fuchsia-700 hover:text-fuchsia-600" to="/login">
+        <Link className="font-semibold text-fuchsia-300 hover:text-fuchsia-200" to="/login">
           Voltar para login
         </Link>
       }
       title="Recupere seu acesso"
     >
       {sent ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+        <div className="rounded-lg border border-emerald-300/25 bg-emerald-400/10 px-4 py-3 text-sm font-medium text-emerald-200">
           Se o e-mail estiver cadastrado, enviaremos as instrucoes de recuperacao.
         </div>
       ) : (
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <FormField autoComplete="email" error={errors.email?.message} id="email" label="E-mail" leadingIcon={<Mail size={18} />} type="email" {...register('email')} />
-          {submitError ? <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{submitError}</p> : null}
+          {submitError ? <p className="rounded-lg border border-rose-300/25 bg-rose-400/10 px-3 py-2 text-sm font-medium text-rose-200">{submitError}</p> : null}
           <Button className="w-full" isLoading={isSubmitting} type="submit">
             Enviar instrucoes
           </Button>

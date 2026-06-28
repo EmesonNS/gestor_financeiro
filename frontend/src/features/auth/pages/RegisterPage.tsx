@@ -53,7 +53,7 @@ export function RegisterPage() {
       footer={
         <>
           Ja tem conta aprovada?{' '}
-          <Link className="font-semibold text-fuchsia-700 hover:text-fuchsia-600" to="/login">
+          <Link className="font-semibold text-fuchsia-300 hover:text-fuchsia-200" to="/login">
             Entrar
           </Link>
         </>
@@ -64,7 +64,7 @@ export function RegisterPage() {
         <FormField autoComplete="name" error={errors.name?.message} id="name" label="Nome" leadingIcon={<UserRound size={18} />} {...register('name')} />
         <FormField autoComplete="email" error={errors.email?.message} id="email" label="E-mail" leadingIcon={<Mail size={18} />} type="email" {...register('email')} />
         <FormField autoComplete="new-password" error={errors.password?.message} id="password" label="Senha" leadingIcon={<LockKeyhole size={18} />} type="password" {...register('password')} />
-        {submitError ? <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">{submitError}</p> : null}
+        {submitError ? <p className="rounded-lg border border-rose-300/25 bg-rose-400/10 px-3 py-2 text-sm font-medium text-rose-200">{submitError}</p> : null}
         <Button className="w-full" isLoading={isSubmitting} type="submit">
           Enviar cadastro
         </Button>

@@ -7,6 +7,7 @@ import { ForgotPasswordPage } from '../../features/auth/pages/ForgotPasswordPage
 import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterPage } from '../../features/auth/pages/RegisterPage';
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
+import { ProfilePage } from '../../features/profile/pages/ProfilePage';
 import { AppLayout } from '../../shared/layouts/AppLayout';
 import { AuthLayout } from '../../shared/layouts/AuthLayout';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -27,6 +28,7 @@ export function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>
 

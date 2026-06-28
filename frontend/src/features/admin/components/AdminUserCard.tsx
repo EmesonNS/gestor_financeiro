@@ -15,7 +15,7 @@ export function AdminUserCard({ onAction, user }: AdminUserCardProps) {
   const commands = availableCommands(user.status);
 
   return (
-    <article className="rounded-lg border border-white/70 bg-white/95 p-5 shadow-2xl shadow-fuchsia-950/15 backdrop-blur">
+    <article className="app-panel p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-3">
@@ -35,16 +35,16 @@ export function AdminUserCard({ onAction, user }: AdminUserCardProps) {
           </div>
         </div>
 
-        <Link className="rounded-lg border border-fuchsia-200 bg-white px-3 py-2 text-sm font-semibold text-fuchsia-950 hover:bg-fuchsia-50" to={`/admin/users/${user.id}`}>
+        <Link className="rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-sm font-semibold text-fuchsia-50 hover:bg-white/15" to={`/admin/users/${user.id}`}>
           Ver detalhes
         </Link>
       </div>
 
       {commands.length ? (
-        <div className="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+        <div className="mt-5 flex flex-wrap gap-2 border-t border-white/10 pt-4">
           {commands.map((command) => (
             <Button
-              className={`min-h-9 px-3 py-1.5 ${command === 'reject' || command === 'suspend' || command === 'delete' ? 'border-rose-200 text-rose-700 hover:bg-rose-50' : ''}`}
+              className={`min-h-9 px-3 py-1.5 ${command === 'reject' || command === 'suspend' || command === 'delete' ? 'border-rose-300/25 text-rose-200 hover:bg-rose-400/10' : ''}`}
               key={command}
               onClick={() => onAction(user, command)}
               type="button"

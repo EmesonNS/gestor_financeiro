@@ -31,18 +31,18 @@ export function AdminActionDialog({ command, isLoading, onClose, onConfirm, user
   const canConfirm = !reasonRequired || reason.trim().length > 0;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 px-4 backdrop-blur-sm">
-      <section className="w-full max-w-lg rounded-lg border border-fuchsia-100 bg-white p-6 shadow-2xl shadow-slate-950/20">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-600">Confirmacao administrativa</p>
-        <h2 className="mt-3 font-serif text-2xl font-semibold text-slate-950">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 px-4 backdrop-blur-sm">
+      <section className="app-panel w-full max-w-lg p-6">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-300">Confirmacao administrativa</p>
+        <h2 className="mt-3 font-serif text-2xl font-semibold text-[#f7ecff]">
           {commandLabels[command]} {userName}
         </h2>
-        <p className="mt-3 text-sm leading-6 text-slate-600">{commandCopy[command]}</p>
+        <p className="mt-3 text-sm leading-6 text-[#c8a9d8]">{commandCopy[command]}</p>
 
-        <label className="mt-5 block text-sm font-medium text-slate-700" htmlFor="admin-reason">
+        <label className="mt-5 block text-sm font-medium text-[#dcc3e8]" htmlFor="admin-reason">
           Motivo {reasonRequired ? '' : '(opcional)'}
           <textarea
-            className="mt-2 min-h-28 w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-fuchsia-500 focus:ring-4 focus:ring-fuchsia-100"
+            className="mt-2 min-h-28 w-full resize-none rounded-lg border border-[#5a3a6e] bg-[#24112f] px-3 py-2 text-[#f7ecff] outline-none transition placeholder:text-[#9f82af] focus:border-fuchsia-400 focus:ring-4 focus:ring-fuchsia-500/20"
             id="admin-reason"
             onChange={(event) => setReason(event.target.value)}
             placeholder="Registre o contexto da decisao"
