@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from 'react-router';
 
 import { AdminUserDetailsPage } from '../../features/admin/pages/AdminUserDetailsPage';
 import { AdminUsersPage } from '../../features/admin/pages/AdminUsersPage';
+import { AccountFormPage } from '../../features/accounts/pages/AccountFormPage';
+import { AccountsPage } from '../../features/accounts/pages/AccountsPage';
 import { AccountStatusPage } from '../../features/auth/pages/AccountStatusPage';
 import { ForgotPasswordPage } from '../../features/auth/pages/ForgotPasswordPage';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
@@ -29,6 +31,9 @@ export function AppRoutes() {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/accounts" element={<AccountsPage />} />
+          <Route path="/accounts/new" element={<AccountFormPage />} />
+          <Route path="/accounts/:id/edit" element={<AccountFormPage />} />
         </Route>
       </Route>
 
