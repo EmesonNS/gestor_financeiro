@@ -55,6 +55,37 @@ body {
   color: #f7ecff;
 }
 
+.app-scrollbar {
+  scrollbar-color: #d946ef rgb(36 17 47 / 0.72);
+  scrollbar-width: thin;
+}
+
+.app-scrollbar::-webkit-scrollbar {
+  height: 0.7rem;
+  width: 0.7rem;
+}
+
+.app-scrollbar::-webkit-scrollbar-track {
+  background: linear-gradient(90deg, rgb(36 17 47 / 0.82), rgb(52 32 68 / 0.82));
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 999px;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #c800ff, #ff6bb5);
+  border: 2px solid rgb(36 17 47 / 0.96);
+  border-radius: 999px;
+  box-shadow: 0 0.35rem 1rem rgb(200 0 255 / 0.22);
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #e044ff, #ff8bc5);
+}
+
+.app-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 .app-panel :is(.text-slate-950, .text-slate-900) {
   color: #f7ecff;
 }
