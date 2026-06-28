@@ -1,4 +1,5 @@
 import { apiClient } from '../../../shared/lib/api-client';
+import { DEFAULT_PAGE_SIZE } from '../../../shared/config/pagination';
 import type { AdminUser, AdminUserCommand, AdminUserDetails, PageResponse } from '../types/admin.types';
 
 const actionPaths: Record<AdminUserCommand, string> = {
@@ -10,14 +11,14 @@ const actionPaths: Record<AdminUserCommand, string> = {
 };
 
 export const adminUsersService = {
-  async listUsers(page = 0, size = 20) {
+  async listUsers(page = 0, size = DEFAULT_PAGE_SIZE) {
     const { data } = await apiClient.get<PageResponse<AdminUser>>('/admin/users', {
       params: { page, size },
     });
     return data;
   },
 
-  async listPendingUsers(page = 0, size = 20) {
+  async listPendingUsers(page = 0, size = DEFAULT_PAGE_SIZE) {
     const { data } = await apiClient.get<PageResponse<AdminUser>>('/admin/users/pending', {
       params: { page, size },
     });

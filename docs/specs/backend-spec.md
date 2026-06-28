@@ -114,6 +114,8 @@ src/main/java/com/zorysa/finance
 - Categorias de receita/despesa.
 - Categorias padrão e personalizadas por usuário.
 - Validação de categoria pertencente ao usuário.
+- Contagem de categorias personalizadas do usuário autenticado, considerando apenas `defaultCategory=false`.
+- Contagem de categorias aplicáveis ao usuário autenticado por tipo (`INCOME` e `EXPENSE`), incluindo categorias padrão globais e pessoais do usuário.
 
 ### transactions
 
@@ -279,7 +281,7 @@ Testes mínimos:
 
 ## 11. Padrões de resposta da API
 
-Listagens paginadas:
+Listagens paginadas e qualquer resposta `GET` com múltiplos itens:
 
 ```json
 {
@@ -375,7 +377,8 @@ Repositories financeiros devem oferecer métodos filtrando por `id` e `userId`, 
 - Nunca usar `double` ou `float` para dinheiro.
 - Usar `LocalDate` para datas financeiras sem horário.
 - Usar `OffsetDateTime` ou `Instant` para timestamps técnicos.
-- Usar paginação em listagens.
+- Usar paginação em todo `GET` que retorna coleção ou múltiplas linhas, incluindo categorias, relatórios, gráficos tabulares e parcelas.
+- `GET` por id e endpoints de resumo com objeto único não usam paginação.
 - Ordenação padrão de transações por data decrescente.
 - Validar valores positivos, datas obrigatórias, limite de cartão >= 0, parcelas > 0 e dias entre 1 e 31.
 

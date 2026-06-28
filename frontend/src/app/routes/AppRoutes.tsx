@@ -8,6 +8,8 @@ import { AccountStatusPage } from '../../features/auth/pages/AccountStatusPage';
 import { ForgotPasswordPage } from '../../features/auth/pages/ForgotPasswordPage';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterPage } from '../../features/auth/pages/RegisterPage';
+import { CategoriesPage } from '../../features/categories/pages/CategoriesPage';
+import { CategoryFormPage } from '../../features/categories/pages/CategoryFormPage';
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
 import { ProfilePage } from '../../features/profile/pages/ProfilePage';
 import { AppLayout } from '../../shared/layouts/AppLayout';
@@ -34,6 +36,9 @@ export function AppRoutes() {
           <Route path="/accounts" element={<AccountsPage />} />
           <Route path="/accounts/new" element={<AccountFormPage />} />
           <Route path="/accounts/:id/edit" element={<AccountFormPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/categories/new" element={<CategoryFormPage />} />
+          <Route path="/categories/:id/edit" element={<CategoryFormPage />} />
         </Route>
       </Route>
 

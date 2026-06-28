@@ -28,14 +28,14 @@ export function AccountFormPage() {
           name: data.name,
           type: data.type,
         });
-        setSubmitMessage('Conta atualizada.');
+        navigate('/accounts', { replace: true });
       } else {
-        const account = await createMutation.mutateAsync({
+        await createMutation.mutateAsync({
           initialBalance: data.initialBalance,
           name: data.name,
           type: data.type,
         });
-        navigate(`/accounts/${account.id}/edit`, { replace: true });
+        navigate('/accounts', { replace: true });
       }
     } catch (error) {
       const message = error instanceof AxiosError ? (error.response?.data as ApiErrorResponse | undefined)?.message : null;

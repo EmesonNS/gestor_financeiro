@@ -158,6 +158,7 @@ src
 ## 10. Estado assíncrono
 
 - TanStack Query gerencia dados vindos da API, loading, erro, refetch e cache.
+- Hooks de listagem devem aceitar `page`, `size` e `sort` sempre que consumirem endpoints `GET` com múltiplos resultados.
 - Estado local fica restrito a UI: modal aberto, filtro temporário, aba ativa.
 - Evitar duplicar no estado local dados já gerenciados pela query.
 
@@ -165,7 +166,7 @@ src
 
 - `AppLayout`, `AuthLayout`, `Sidebar`, `Header`.
 - `PageHeader`, `SummaryCard`, `ChartCard`.
-- `DataTable`, `FilterBar`, `EmptyState`, `LoadingState`, `ErrorState`.
+- `DataTable`, `Pagination`, `FilterBar`, `EmptyState`, `LoadingState`, `ErrorState`.
 - `ConfirmDialog`, `Modal`.
 - `Button`, `Input`, `Select`, `DatePicker`, `MoneyInput`, `FormField`.
 - `Badge`, `StatusBadge`.
@@ -173,7 +174,7 @@ src
 Composition patterns:
 
 - `PageHeader` recebe ações via `children`.
-- `DataTable` recebe colunas configuráveis.
+- `DataTable` recebe colunas configuráveis e integra estado de paginação quando a fonte for paginada.
 - `Modal` expõe `Header`, `Body` e `Footer`.
 - `FormField` compõe label, controle e erro.
 - `SummaryCard` recebe ícone, título, valor e variação.

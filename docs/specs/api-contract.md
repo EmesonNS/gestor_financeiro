@@ -9,7 +9,8 @@
 - Datas financeiras: `YYYY-MM-DD`.
 - Timestamps: ISO 8601 UTC/offset.
 - Dinheiro: decimal com duas casas.
-- Listagens devem suportar `page`, `size` e `sort` quando aplicável.
+- Todo endpoint `GET` que retorna mais de um item deve suportar paginação com `page`, `size` e, quando houver ordenação aplicável, `sort`.
+- Endpoints `GET` por id ou endpoints de resumo com objeto único não usam paginação.
 - Todas as regras de autorização usam o usuário autenticado do token.
 - Recurso inexistente ou pertencente a outro usuário retorna 404 ou 403 conforme política final, com preferência por 404 para reduzir enumeração.
 
@@ -146,7 +147,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 
 - Descrição: lista usuários por status.
 - Auth: sim, admin.
-- Query: `page`, `size`, `status`, `search`, `createdFrom`, `createdTo`.
+- Query: `page`, `size`, `sort`, `status`, `search`, `createdFrom`, `createdTo`.
 - Response 200: página de `{ "id": "uuid", "name": "Maria", "email": "maria@email.com", "role": "USER", "status": "PENDING_APPROVAL", "createdAt": "...", "approvedAt": null, "rejectedAt": null, "suspendedAt": null }`.
 - Erros: 401, 403.
 - Autorização: apenas admin.
@@ -155,7 +156,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 
 - Descrição: lista solicitações pendentes de aprovação.
 - Auth: sim, admin.
-- Query: `page`, `size`.
+- Query: `page`, `size`, `sort`.
 - Response 200: página de usuários com status `PENDING_APPROVAL`.
 - Erros: 401, 403.
 
@@ -212,7 +213,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/accounts`
 
 - Auth: sim.
-- Query: `page`, `size`, `archived`, `type`.
+- Query: `page`, `size`, `sort`, `archived`, `type`.
 - Response 200: página de contas.
 - Autorização: filtra por `user_id`.
 
@@ -256,14 +257,28 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/categories`
 
 - Auth: sim.
-- Query: `type`.
-- Response 200: lista ou página de categorias do usuário e padrão aplicáveis.
+- Query: `page`, `size`, `sort`, `type`.
+- Response 200: página de categorias do usuário e padrão aplicáveis.
 
 ### POST `/api/categories`
 
 - Auth: sim.
 - Body: `{ "name": "Alimentação", "type": "EXPENSE", "color": "#16a34a", "icon": "utensils" }`.
 - Response 201.
+
+### GET `/api/categories/custom/count`
+
+- Auth: sim.
+- Response 200: `{ "count": 5 }`.
+- Regra: contar somente categorias personalizadas do usuário autenticado, ou seja, `defaultCategory=false` e `user_id` do token.
+- Paginação: não se aplica por retornar objeto único de resumo.
+
+### GET `/api/categories/type-counts`
+
+- Auth: sim.
+- Response 200: `{ "incomeCount": 4, "expenseCount": 12 }`.
+- Regra: contar categorias aplicáveis ao usuário autenticado agrupadas por tipo, incluindo categorias padrão globais e categorias pessoais do usuário, excluindo categorias de outros usuários.
+- Paginação: não se aplica por retornar objeto único de resumo.
 
 ### GET `/api/categories/{id}`
 
@@ -289,7 +304,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/transactions`
 
 - Auth: sim.
-- Query: `page`, `size`, `startDate`, `endDate`, `type`, `status`, `categoryId`, `accountId`.
+- Query: `page`, `size`, `sort`, `startDate`, `endDate`, `type`, `status`, `categoryId`, `accountId`.
 - Response 200: página por data decrescente.
 - Autorização: filtra por `user_id`.
 
@@ -337,7 +352,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/bills`
 
 - Auth: sim.
-- Query: `page`, `size`, `status`, `startDueDate`, `endDueDate`, `categoryId`, `accountId`, `overdue`.
+- Query: `page`, `size`, `sort`, `status`, `startDueDate`, `endDueDate`, `categoryId`, `accountId`, `overdue`.
 - Response 200.
 
 ### POST `/api/bills`
@@ -375,8 +390,8 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/budgets`
 
 - Auth: sim.
-- Query: `month`, `year`, `categoryId`.
-- Response 200: orçamentos com gasto, restante e percentual.
+- Query: `page`, `size`, `sort`, `month`, `year`, `categoryId`.
+- Response 200: página de orçamentos com gasto, restante e percentual.
 
 ### POST `/api/budgets`
 
@@ -404,7 +419,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/goals`
 
 - Auth: sim.
-- Query: `status`.
+- Query: `page`, `size`, `sort`, `status`.
 - Response 200.
 
 ### POST `/api/goals`
@@ -439,8 +454,8 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/credit-cards`
 
 - Auth: sim.
-- Query: `archived`.
-- Response 200: cartões com limite total, usado e disponível.
+- Query: `page`, `size`, `sort`, `archived`.
+- Response 200: página de cartões com limite total, usado e disponível.
 
 ### POST `/api/credit-cards`
 
@@ -475,7 +490,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/credit-cards/{cardId}/invoices`
 
 - Auth: sim.
-- Query: `status`, `year`.
+- Query: `page`, `size`, `sort`, `status`, `year`.
 - Response 200.
 - Autorização: cartão deve pertencer ao usuário.
 
@@ -508,7 +523,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/credit-cards/{cardId}/purchases`
 
 - Auth: sim.
-- Query: `page`, `size`, `status`, `startDate`, `endDate`.
+- Query: `page`, `size`, `sort`, `status`, `startDate`, `endDate`.
 - Response 200.
 
 ### GET `/api/card-purchases/{purchaseId}`
@@ -533,19 +548,20 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/installments`
 
 - Auth: sim.
-- Query: `page`, `size`, `status`, `cardId`, `month`, `year`.
+- Query: `page`, `size`, `sort`, `status`, `cardId`, `month`, `year`.
 - Response 200.
 
 ### GET `/api/installments/future`
 
 - Auth: sim.
-- Query: `cardId`, `fromMonth`, `fromYear`.
+- Query: `page`, `size`, `sort`, `cardId`, `fromMonth`, `fromYear`.
 - Response 200.
 
 ### GET `/api/card-purchases/{purchaseId}/installments`
 
 - Auth: sim.
-- Response 200.
+- Query: `page`, `size`, `sort`.
+- Response 200: página de parcelas da compra.
 
 ## Dashboard
 
@@ -564,25 +580,25 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/dashboard/charts/expenses-by-category`
 
 - Auth: sim.
-- Query: `month`, `year`.
-- Response 200: lista de `{ "categoryId": "uuid", "categoryName": "Alimentação", "amount": 100 }`.
+- Query: `page`, `size`, `sort`, `month`, `year`.
+- Response 200: página de `{ "categoryId": "uuid", "categoryName": "Alimentação", "amount": 100 }`.
 
 ### GET `/api/dashboard/charts/income-vs-expense`
 
 - Auth: sim.
-- Query: `year`.
-- Response 200: séries mensais.
+- Query: `page`, `size`, `sort`, `year`.
+- Response 200: página de séries mensais.
 
 ## Reports
 
 Todos exigem autenticação e filtram por `user_id`.
 
-- GET `/api/reports/transactions`: query `startDate`, `endDate`, `type`, `categoryId`, `accountId`.
-- GET `/api/reports/expenses-by-category`: query `startDate`, `endDate`.
-- GET `/api/reports/monthly-evolution`: query `year`.
-- GET `/api/reports/accounts-balance`: query `date`.
-- GET `/api/reports/budget-vs-actual`: query `month`, `year`.
-- GET `/api/reports/credit-card-expenses`: query `cardId`, `startDate`, `endDate`.
-- GET `/api/reports/future-installments`: query `cardId`, `fromMonth`, `fromYear`.
+- GET `/api/reports/transactions`: query `page`, `size`, `sort`, `startDate`, `endDate`, `type`, `categoryId`, `accountId`.
+- GET `/api/reports/expenses-by-category`: query `page`, `size`, `sort`, `startDate`, `endDate`.
+- GET `/api/reports/monthly-evolution`: query `page`, `size`, `sort`, `year`.
+- GET `/api/reports/accounts-balance`: query `page`, `size`, `sort`, `date`.
+- GET `/api/reports/budget-vs-actual`: query `page`, `size`, `sort`, `month`, `year`.
+- GET `/api/reports/credit-card-expenses`: query `page`, `size`, `sort`, `cardId`, `startDate`, `endDate`.
+- GET `/api/reports/future-installments`: query `page`, `size`, `sort`, `cardId`, `fromMonth`, `fromYear`.
 
-Responses 200 variam por relatório, sempre em formato de tabela e dados agregados para gráfico. Erros comuns: 400, 401.
+Responses 200 variam por relatório; quando retornarem múltiplas linhas, devem usar o modelo paginado. Erros comuns: 400, 401.

@@ -1,4 +1,5 @@
 import { apiClient } from '../../../shared/lib/api-client';
+import { DEFAULT_PAGE_SIZE } from '../../../shared/config/pagination';
 import type { Account, AccountFilters, CreateAccountRequest, PageResponse, UpdateAccountRequest } from '../types/accounts.types';
 
 export const accountsService = {
@@ -7,7 +8,7 @@ export const accountsService = {
       params: {
         archived: filters.archived,
         page: filters.page,
-        size: 12,
+        size: DEFAULT_PAGE_SIZE,
         type: filters.type,
       },
     });
