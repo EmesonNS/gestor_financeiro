@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public class AuthUserPrincipal implements UserDetails {
@@ -11,12 +12,14 @@ public class AuthUserPrincipal implements UserDetails {
     private final UUID id;
     private final String email;
     private final String password;
+    private final String role;
     private final boolean active;
 
-    public AuthUserPrincipal(UUID id, String email, String password, boolean active) {
+    public AuthUserPrincipal(UUID id, String email, String password, String role, boolean active) {
         this.id = id;
         this.email = email;
         this.password = password;
+        this.role = role;
         this.active = active;
     }
 
@@ -26,7 +29,7 @@ public class AuthUserPrincipal implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role));
     }
 
     @Override

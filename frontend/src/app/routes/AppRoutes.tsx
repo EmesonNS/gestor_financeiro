@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router';
 
+import { AdminUserDetailsPage } from '../../features/admin/pages/AdminUserDetailsPage';
+import { AdminUsersPage } from '../../features/admin/pages/AdminUsersPage';
 import { AccountStatusPage } from '../../features/auth/pages/AccountStatusPage';
 import { ForgotPasswordPage } from '../../features/auth/pages/ForgotPasswordPage';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
@@ -25,6 +27,14 @@ export function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+        </Route>
+      </Route>
+
+      <Route element={<ProtectedRoute requiredRole="ADMIN" />}>
+        <Route element={<AppLayout />}>
+          <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/users/pending" element={<AdminUsersPage />} />
+          <Route path="/admin/users/:id" element={<AdminUserDetailsPage />} />
         </Route>
       </Route>
 

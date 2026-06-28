@@ -42,6 +42,18 @@ public class User {
     @Column(nullable = false, columnDefinition = "user_status")
     private UserStatus status = UserStatus.APPROVED;
 
+    @Column(name = "approved_at")
+    private Instant approvedAt;
+
+    @Column(name = "rejected_at")
+    private Instant rejectedAt;
+
+    @Column(name = "suspended_at")
+    private Instant suspendedAt;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -93,7 +105,26 @@ public class User {
     }
 
     public UserStatus getStatus() {
+        if (status == UserStatus.APPROVED && approvedAt == null) {
+            return UserStatus.PENDING_APPROVAL;
+        }
         return status;
+    }
+
+    public Instant getApprovedAt() {
+        return approvedAt;
+    }
+
+    public Instant getRejectedAt() {
+        return rejectedAt;
+    }
+
+    public Instant getSuspendedAt() {
+        return suspendedAt;
+    }
+
+    public Instant getDeletedAt() {
+        return deletedAt;
     }
 
     public Instant getCreatedAt() {
@@ -114,6 +145,35 @@ public class User {
 
     public void markPendingApproval() {
         status = UserStatus.PENDING_APPROVAL;
+        active = true;
+    }
+
+    public void approve(Instant instant) {
+        status = UserStatus.APPROVED;
+        approvedAt = instant;
+        active = true;
+    }
+
+    public void reject(Instant instant) {
+        status = UserStatus.REJECTED;
+        rejectedAt = instant;
+        active = true;
+    }
+
+    public void suspend(Instant instant) {
+        status = UserStatus.SUSPENDED;
+        suspendedAt = instant;
+        active = true;
+    }
+
+    public void reactivate(Instant instant) {
+        approve(instant);
+    }
+
+    public void delete(Instant instant) {
+        status = UserStatus.DELETED;
+        deletedAt = instant;
+        active = false;
     }
 
     public void updatePasswordHash(String passwordHash) {

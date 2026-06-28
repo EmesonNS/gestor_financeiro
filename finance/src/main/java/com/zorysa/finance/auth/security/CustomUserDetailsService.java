@@ -18,7 +18,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) {
         return userService.findActiveByEmail(username)
-                .map(user -> new AuthUserPrincipal(user.getId(), user.getEmail(), user.getPasswordHash(), user.isActive()))
+                .map(user -> new AuthUserPrincipal(user.getId(), user.getEmail(), user.getPasswordHash(), user.getRole().name(), user.isActive()))
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario nao encontrado"));
     }
 }

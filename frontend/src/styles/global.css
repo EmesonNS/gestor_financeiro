@@ -23,6 +23,13 @@ body {
     linear-gradient(135deg, #160722 0%, #32104a 45%, #4a1239 100%);
 }
 
+.admin-app-shell {
+  background:
+    radial-gradient(circle at 14% 12%, rgb(217 70 239 / 0.3), transparent 23rem),
+    radial-gradient(circle at 88% 72%, rgb(244 63 94 / 0.22), transparent 24rem),
+    linear-gradient(135deg, #160722 0%, #32104a 46%, #4a1239 100%);
+}
+
 .cashflow-line {
   position: absolute;
   inset: 0;
@@ -54,4 +61,58 @@ body {
 .cashflow-line::after {
   border: 1px solid rgb(255 255 255 / 0.12);
   inset: 0;
+}
+
+.admin-flow-line {
+  inset: -2rem 0 auto auto;
+  height: 12rem;
+  opacity: 0.68;
+  pointer-events: none;
+  position: absolute;
+  width: min(46rem, 72vw);
+}
+
+.admin-flow-line::before,
+.admin-flow-line::after {
+  content: "";
+  position: absolute;
+}
+
+.admin-flow-line::before {
+  background:
+    linear-gradient(145deg, transparent 0 44%, rgb(244 114 182 / 0.75) 44% 45%, transparent 45% 100%),
+    linear-gradient(25deg, transparent 0 54%, rgb(192 132 252 / 0.72) 54% 55%, transparent 55% 100%);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 999px;
+  inset: 0;
+}
+
+.admin-flow-line::after {
+  background: #f0abfc;
+  border-radius: 999px;
+  box-shadow:
+    12rem 4.75rem 0 #fb7185,
+    31rem 3rem 0 #c084fc;
+  height: 0.75rem;
+  left: 5rem;
+  top: 4rem;
+  width: 0.75rem;
+}
+
+.admin-timeline {
+  border-left: 2px solid rgb(217 70 239 / 0.22);
+  padding-left: 1rem;
+}
+
+.admin-timeline > li::before {
+  background: #d946ef;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px rgb(217 70 239 / 0.18);
+  content: "";
+  height: 0.85rem;
+  left: -1.5rem;
+  position: absolute;
+  top: 1.15rem;
+  width: 0.85rem;
 }
