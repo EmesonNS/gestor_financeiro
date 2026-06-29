@@ -1,7 +1,6 @@
 import { Clock3 } from 'lucide-react';
 
 const futureItems = [
-  'Metas: apos etapa 11',
   'Faturas, limite e parcelas: apos etapas 12 e 13',
 ];
 

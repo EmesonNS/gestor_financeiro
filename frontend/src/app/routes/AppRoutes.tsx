@@ -15,6 +15,8 @@ import { BudgetsPage } from '../../features/budgets/pages/BudgetsPage';
 import { CategoriesPage } from '../../features/categories/pages/CategoriesPage';
 import { CategoryFormPage } from '../../features/categories/pages/CategoryFormPage';
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
+import { GoalFormPage } from '../../features/goals/pages/GoalFormPage';
+import { GoalsPage } from '../../features/goals/pages/GoalsPage';
 import { ProfilePage } from '../../features/profile/pages/ProfilePage';
 import { TransactionFormPage } from '../../features/transactions/pages/TransactionFormPage';
 import { TransactionsPage } from '../../features/transactions/pages/TransactionsPage';
@@ -54,6 +56,9 @@ export function AppRoutes() {
           <Route path="/budgets" element={<BudgetsPage />} />
           <Route path="/budgets/new" element={<BudgetFormPage />} />
           <Route path="/budgets/:id/edit" element={<BudgetFormPage />} />
+          <Route path="/goals" element={<GoalsPage />} />
+          <Route path="/goals/new" element={<GoalFormPage />} />
+          <Route path="/goals/:id/edit" element={<GoalFormPage />} />
         </Route>
       </Route>
 

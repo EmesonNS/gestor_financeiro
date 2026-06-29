@@ -76,6 +76,16 @@ export function AppLayout() {
             </Link>
             <Link
               className={
+                location.pathname.startsWith('/goals')
+                  ? 'font-semibold text-white'
+                  : 'hover:text-white'
+              }
+              to="/goals"
+            >
+              Metas
+            </Link>
+            <Link
+              className={
                 location.pathname === '/profile'
                   ? 'font-semibold text-white'
                   : 'hover:text-white'

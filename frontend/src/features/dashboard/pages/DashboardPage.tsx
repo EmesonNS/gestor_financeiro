@@ -7,6 +7,8 @@ import { useBills } from '../../bills/hooks/useBills';
 import { DashboardBudgetPanel } from '../../budgets/components/DashboardBudgetPanel';
 import { useBudgets } from '../../budgets/hooks/useBudgets';
 import { useCategories } from '../../categories/hooks/useCategories';
+import { DashboardGoalsPanel } from '../../goals/components/DashboardGoalsPanel';
+import { useGoals } from '../../goals/hooks/useGoals';
 import { DashboardMetricCard } from '../components/DashboardMetricCard';
 import { ExpenseCategoryChart } from '../components/ExpenseCategoryChart';
 import { FutureDependencyPanel } from '../components/FutureDependencyPanel';
@@ -68,6 +70,7 @@ export function DashboardPage() {
   const upcomingBillsQuery = useBills({ endDueDate: billRange.endDueDate, page: 0, startDueDate: billRange.startDueDate, status: 'PENDING' });
   const budgetsQuery = useBudgets({ month: period.month, page: 0, year: period.year });
   const budgetCategoriesQuery = useCategories({ page: 0, type: 'EXPENSE' });
+  const activeGoalsQuery = useGoals({ page: 0, status: 'ACTIVE' });
   const summary = summaryQuery.data;
   const monthly = monthlyQuery.data;
   const expenses = expensesQuery.data?.content ?? [];
@@ -191,6 +194,8 @@ export function DashboardPage() {
           categories={budgetCategoriesQuery.data?.content ?? []}
           isLoading={budgetsQuery.isLoading || budgetCategoriesQuery.isLoading}
         />
+
+        <DashboardGoalsPanel goals={activeGoalsQuery.data?.content ?? []} isLoading={activeGoalsQuery.isLoading} />
 
         <div>
           {expensesQuery.isError ? (
