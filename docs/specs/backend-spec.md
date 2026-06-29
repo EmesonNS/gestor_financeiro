@@ -136,9 +136,10 @@ src/main/java/com/zorysa/finance
 
 ### budgets
 
-- Orçamento mensal por categoria.
-- Cálculo de consumo com base em despesas realizadas.
+- Orçamento por categoria com início obrigatório e fim opcional.
+- Cálculo de consumo mensal com base em despesas realizadas dentro do mês consultado.
 - Alertas de limite ultrapassado.
+- Bloqueio de períodos sobrepostos para a mesma categoria e usuário.
 
 ### goals
 

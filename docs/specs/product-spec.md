@@ -151,11 +151,12 @@ Funcionalidades administrativas interessantes para evolução:
 
 ### Orçamentos
 
-- Criar orçamento mensal por categoria.
-- Definir limite de gasto.
+- Criar orçamento por categoria para um mês, vários meses ou sem data final.
+- Definir limite de gasto mensal.
 - Calcular gasto realizado por categoria.
 - Exibir restante, percentual utilizado e alerta de estouro.
 - Permitir consulta de meses anteriores.
+- Impedir orçamentos sobrepostos para a mesma categoria.
 
 ### Metas financeiras
 

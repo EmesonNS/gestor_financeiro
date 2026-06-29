@@ -395,13 +395,15 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 
 - Auth: sim.
 - Query: `page`, `size`, `sort`, `month`, `year`, `categoryId`.
-- Response 200: página de orçamentos com gasto, restante e percentual.
+- Response 200: página de orçamentos ativos no mês consultado, com gasto, restante e percentual.
 
 ### POST `/api/budgets`
 
 - Auth: sim.
-- Body: `{ "categoryId": "uuid", "month": 6, "year": 2026, "limitAmount": 1000.00 }`.
+- Body: `{ "categoryId": "uuid", "startMonth": 6, "startYear": 2026, "endMonth": 12, "endYear": 2026, "limitAmount": 1000.00 }`.
+- Para orçamento sem fim, `endMonth` e `endYear` devem ser `null`.
 - Response 201.
+- Regra: bloquear orçamento quando já existir outro orçamento da mesma categoria com periodo sobreposto para o usuario.
 
 ### GET `/api/budgets/{id}`
 
@@ -411,7 +413,9 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### PUT `/api/budgets/{id}`
 
 - Auth: sim.
+- Body: igual criação.
 - Response 200.
+- Regra: bloquear alteração quando o novo periodo sobrepor outro orçamento da mesma categoria do usuario.
 
 ### DELETE `/api/budgets/{id}`
 

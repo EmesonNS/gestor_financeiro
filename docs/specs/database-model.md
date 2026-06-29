@@ -191,22 +191,26 @@ Descrição: regras de despesas recorrentes.
 
 ## budgets
 
-Descrição: orçamento mensal por categoria.
+Descrição: orçamento por categoria com periodo mensal inclusivo.
 
 | Campo | Tipo | Regras |
 |---|---|---|
 | id | uuid | PK |
 | user_id | uuid | FK users(id), not null |
 | category_id | uuid | FK categories(id), not null |
-| month | smallint | not null, 1..12 |
-| year | smallint | not null |
+| start_month | smallint | not null, 1..12 |
+| start_year | smallint | not null |
+| end_month | smallint | nullable, 1..12 |
+| end_year | smallint | nullable |
 | limit_amount | numeric(15,2) | not null, > 0 |
 | created_at | timestamptz | not null |
 | updated_at | timestamptz | not null |
 
-Índices: `(user_id, year, month)`, `(user_id, category_id)`.
+Observações: `end_month` e `end_year` nulos indicam orçamento sem fim. Quando houver fim, os dois campos devem ser preenchidos e o fim deve ser igual ou posterior ao início.
 
-Constraint: único por usuário, categoria, mês e ano.
+Índices: `(user_id, start_year, start_month)`, `(user_id, category_id)`, `(user_id, category_id, start_year, start_month, end_year, end_month)`.
+
+Constraint/regra: não pode existir mais de um orçamento do mesmo usuário e categoria com períodos sobrepostos, incluindo orçamento sem fim.
 
 ## goals
 

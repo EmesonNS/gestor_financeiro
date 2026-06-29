@@ -4,6 +4,9 @@ import { useMemo, useState } from 'react';
 import { Button } from '../../../shared/ui/Button';
 import { DashboardBillsPanel } from '../../bills/components/DashboardBillsPanel';
 import { useBills } from '../../bills/hooks/useBills';
+import { DashboardBudgetPanel } from '../../budgets/components/DashboardBudgetPanel';
+import { useBudgets } from '../../budgets/hooks/useBudgets';
+import { useCategories } from '../../categories/hooks/useCategories';
 import { DashboardMetricCard } from '../components/DashboardMetricCard';
 import { ExpenseCategoryChart } from '../components/ExpenseCategoryChart';
 import { FutureDependencyPanel } from '../components/FutureDependencyPanel';
@@ -63,6 +66,8 @@ export function DashboardPage() {
   const incomeExpenseSecondPageQuery = useIncomeVsExpense({ page: 1, year: period.year });
   const overdueBillsQuery = useBills({ overdue: true, page: 0 });
   const upcomingBillsQuery = useBills({ endDueDate: billRange.endDueDate, page: 0, startDueDate: billRange.startDueDate, status: 'PENDING' });
+  const budgetsQuery = useBudgets({ month: period.month, page: 0, year: period.year });
+  const budgetCategoriesQuery = useCategories({ page: 0, type: 'EXPENSE' });
   const summary = summaryQuery.data;
   const monthly = monthlyQuery.data;
   const expenses = expensesQuery.data?.content ?? [];
@@ -181,6 +186,12 @@ export function DashboardPage() {
       <FutureDependencyPanel />
 
       <div className="grid gap-4 xl:grid-cols-2">
+        <DashboardBudgetPanel
+          budgets={budgetsQuery.data?.content ?? []}
+          categories={budgetCategoriesQuery.data?.content ?? []}
+          isLoading={budgetsQuery.isLoading || budgetCategoriesQuery.isLoading}
+        />
+
         <div>
           {expensesQuery.isError ? (
             <div className="rounded-lg border border-rose-300/25 bg-rose-400/10 p-6 text-sm font-medium text-rose-200">Nao foi possivel carregar despesas por categoria.</div>
@@ -194,7 +205,7 @@ export function DashboardPage() {
           />
         </div>
 
-        <div>
+        <div className="xl:col-span-2">
           {incomeExpenseFirstPageQuery.isError || incomeExpenseSecondPageQuery.isError ? (
             <div className="rounded-lg border border-rose-300/25 bg-rose-400/10 p-6 text-sm font-medium text-rose-200">Nao foi possivel carregar receitas x despesas.</div>
           ) : null}

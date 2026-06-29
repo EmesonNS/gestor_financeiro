@@ -10,6 +10,8 @@ import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterPage } from '../../features/auth/pages/RegisterPage';
 import { BillFormPage } from '../../features/bills/pages/BillFormPage';
 import { BillsPage } from '../../features/bills/pages/BillsPage';
+import { BudgetFormPage } from '../../features/budgets/pages/BudgetFormPage';
+import { BudgetsPage } from '../../features/budgets/pages/BudgetsPage';
 import { CategoriesPage } from '../../features/categories/pages/CategoriesPage';
 import { CategoryFormPage } from '../../features/categories/pages/CategoryFormPage';
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
@@ -49,6 +51,9 @@ export function AppRoutes() {
           <Route path="/bills" element={<BillsPage />} />
           <Route path="/bills/new" element={<BillFormPage />} />
           <Route path="/bills/:id/edit" element={<BillFormPage />} />
+          <Route path="/budgets" element={<BudgetsPage />} />
+          <Route path="/budgets/new" element={<BudgetFormPage />} />
+          <Route path="/budgets/:id/edit" element={<BudgetFormPage />} />
         </Route>
       </Route>
 

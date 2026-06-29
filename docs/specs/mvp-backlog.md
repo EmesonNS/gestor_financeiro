@@ -306,9 +306,9 @@ Prioridade: P1.
 
 Objetivo: controlar limites mensais por categoria.
 
-Features: orçamento mensal, consumo, restante e alerta de limite.
+Features: orçamento por período, orçamento sem fim, consumo, restante e alerta de limite.
 
-Tarefas back-end: CRUD e cálculo planejado x realizado.
+Tarefas back-end: CRUD, cálculo planejado x realizado e bloqueio de períodos sobrepostos por categoria.
 
 Tarefas front-end: cards de progresso e formulário.
 
@@ -318,6 +318,14 @@ Critérios de aceite:
 Dado que tenho orçamento para alimentação,
 quando minhas despesas pagas ultrapassam o limite,
 então o orçamento deve indicar limite excedido.
+
+Dado que tenho orçamento para alimentação entre junho e dezembro de 2026,
+quando tento criar outro orçamento de alimentação para um periodo que cruza esses meses,
+então a operação deve ser bloqueada por conflito de periodo.
+
+Dado que tenho orçamento sem fim para alimentação,
+quando tento criar outro orçamento futuro para alimentação,
+então a operação deve ser bloqueada por conflito de periodo.
 ```
 
 Prioridade: P1.
