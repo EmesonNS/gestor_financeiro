@@ -14,6 +14,9 @@ import { BudgetFormPage } from '../../features/budgets/pages/BudgetFormPage';
 import { BudgetsPage } from '../../features/budgets/pages/BudgetsPage';
 import { CategoriesPage } from '../../features/categories/pages/CategoriesPage';
 import { CategoryFormPage } from '../../features/categories/pages/CategoryFormPage';
+import { CreditCardDetailsPage } from '../../features/credit-cards/pages/CreditCardDetailsPage';
+import { CreditCardFormPage } from '../../features/credit-cards/pages/CreditCardFormPage';
+import { CreditCardsPage } from '../../features/credit-cards/pages/CreditCardsPage';
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
 import { GoalFormPage } from '../../features/goals/pages/GoalFormPage';
 import { GoalsPage } from '../../features/goals/pages/GoalsPage';
@@ -59,6 +62,10 @@ export function AppRoutes() {
           <Route path="/goals" element={<GoalsPage />} />
           <Route path="/goals/new" element={<GoalFormPage />} />
           <Route path="/goals/:id/edit" element={<GoalFormPage />} />
+          <Route path="/credit-cards" element={<CreditCardsPage />} />
+          <Route path="/credit-cards/new" element={<CreditCardFormPage />} />
+          <Route path="/credit-cards/:id" element={<CreditCardDetailsPage />} />
+          <Route path="/credit-cards/:id/edit" element={<CreditCardFormPage />} />
         </Route>
       </Route>
 

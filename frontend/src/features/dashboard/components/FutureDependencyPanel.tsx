@@ -1,7 +1,7 @@
 import { Clock3 } from 'lucide-react';
 
 const futureItems = [
-  'Faturas, limite e parcelas: apos etapas 12 e 13',
+  'Faturas e parcelas: apos etapas 12 e 13',
 ];
 
 export function FutureDependencyPanel() {

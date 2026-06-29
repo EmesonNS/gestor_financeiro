@@ -86,6 +86,16 @@ export function AppLayout() {
             </Link>
             <Link
               className={
+                location.pathname.startsWith('/credit-cards')
+                  ? 'font-semibold text-white'
+                  : 'hover:text-white'
+              }
+              to="/credit-cards"
+            >
+              Cartoes
+            </Link>
+            <Link
+              className={
                 location.pathname === '/profile'
                   ? 'font-semibold text-white'
                   : 'hover:text-white'
