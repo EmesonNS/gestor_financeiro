@@ -2,6 +2,8 @@ import { ArrowDownCircle, ArrowUpCircle, ChevronLeft, ChevronRight, Landmark, Tr
 import { useMemo, useState } from 'react';
 
 import { Button } from '../../../shared/ui/Button';
+import { DashboardBillsPanel } from '../../bills/components/DashboardBillsPanel';
+import { useBills } from '../../bills/hooks/useBills';
 import { DashboardMetricCard } from '../components/DashboardMetricCard';
 import { ExpenseCategoryChart } from '../components/ExpenseCategoryChart';
 import { FutureDependencyPanel } from '../components/FutureDependencyPanel';
@@ -44,11 +46,23 @@ function PaginationControls({
 export function DashboardPage() {
   const [period, setPeriod] = useState<DashboardPeriod>(() => currentDashboardPeriod());
   const [expensePage, setExpensePage] = useState(0);
+  const [billRange] = useState(() => {
+    const current = new Date();
+    const today = new Date(current.getFullYear(), current.getMonth(), current.getDate());
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    return {
+      endDueDate: nextWeek.toISOString().slice(0, 10),
+      startDueDate: today.toISOString().slice(0, 10),
+    };
+  });
   const summaryQuery = useDashboardSummary(period);
   const monthlyQuery = useDashboardMonthly(period);
   const expensesQuery = useExpensesByCategory({ page: expensePage, period });
   const incomeExpenseFirstPageQuery = useIncomeVsExpense({ page: 0, year: period.year });
   const incomeExpenseSecondPageQuery = useIncomeVsExpense({ page: 1, year: period.year });
+  const overdueBillsQuery = useBills({ overdue: true, page: 0 });
+  const upcomingBillsQuery = useBills({ endDueDate: billRange.endDueDate, page: 0, startDueDate: billRange.startDueDate, status: 'PENDING' });
   const summary = summaryQuery.data;
   const monthly = monthlyQuery.data;
   const expenses = expensesQuery.data?.content ?? [];
@@ -157,8 +171,14 @@ export function DashboardPage() {
           </div>
         </section>
 
-        <FutureDependencyPanel />
+        <DashboardBillsPanel
+          isLoading={overdueBillsQuery.isLoading || upcomingBillsQuery.isLoading}
+          overdueBills={overdueBillsQuery.data?.content ?? []}
+          upcomingBills={upcomingBillsQuery.data?.content ?? []}
+        />
       </div>
+
+      <FutureDependencyPanel />
 
       <div className="grid gap-4 xl:grid-cols-2">
         <div>

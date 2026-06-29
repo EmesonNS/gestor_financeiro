@@ -250,6 +250,7 @@ Tarefas back-end:
 
 - Implementar regras de impacto no saldo.
 - Reverter saldo ao editar, cancelar ou excluir.
+- Bloquear debito quando a conta financeira nao tiver saldo suficiente.
 - Filtrar sempre por usuário autenticado.
 
 Tarefas front-end: tabela, filtros, formulário, ações de pagamento/cancelamento.
@@ -268,6 +269,10 @@ Critérios de aceite:
 Dado que estou autenticado,
 quando cadastro uma despesa paga vinculada a uma conta,
 então o saldo da conta deve ser reduzido pelo valor da despesa.
+
+Dado que estou autenticado,
+quando tento cadastrar, editar ou pagar uma despesa maior que o saldo da conta,
+então a operação deve ser bloqueada por saldo insuficiente.
 ```
 
 Prioridade: P0.
@@ -279,6 +284,7 @@ Objetivo: controlar vencimentos e transformar pagamentos em despesas.
 Features: cadastro, listagem, vencidas, próximas e pagamento.
 
 Tarefas back-end: CRUD, status, pagamento com transação vinculada.
+- Bloquear pagamento quando a conta financeira nao tiver saldo suficiente.
 
 Tarefas front-end: listagem com alertas visuais, formulário e diálogo de pagamento.
 
@@ -288,6 +294,10 @@ Critérios de aceite:
 Dado que tenho uma conta a pagar pendente,
 quando marco como paga,
 então uma despesa paga é criada ou atualizada e o saldo da conta é reduzido.
+
+Dado que tenho uma conta a pagar pendente,
+quando tento pagar com uma conta sem saldo suficiente,
+então o pagamento deve ser bloqueado e nenhuma despesa deve ser criada.
 ```
 
 Prioridade: P1.

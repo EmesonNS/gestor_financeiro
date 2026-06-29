@@ -162,7 +162,7 @@ export function TransactionForm({ accounts, categories, isLoading, mode, onSubmi
             <option value="">{selectedStatus === realizedStatusFor(selectedType) ? 'Selecione uma conta' : 'Sem conta por enquanto'}</option>
             {accounts.map((account) => (
               <option key={account.id} value={account.id}>
-                {account.name}
+                {account.name} - saldo {new Intl.NumberFormat('pt-BR', { currency: 'BRL', style: 'currency' }).format(Number(account.currentBalance))}
               </option>
             ))}
           </select>

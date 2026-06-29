@@ -67,9 +67,11 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse createTransaction(UUID userId, CreateTransactionRequest request) {
+        TransactionRepository repository = transactionRepository();
         validateCategory(userId, request.categoryId(), request.type());
         validateRealizedStatus(request.type(), request.status());
         Account account = accountForNewImpact(userId, request.accountId(), request.type(), request.status());
+        validateSufficientBalance(account, projectedImpact(request.amount(), request.type(), request.status()));
 
         Transaction transaction = new Transaction(
                 userId,
@@ -83,7 +85,7 @@ public class TransactionService {
                 normalizeOptional(request.notes())
         );
         applyImpact(account, transaction.balanceImpact());
-        return transactionMapper.toResponse(transactionRepository().save(transaction));
+        return transactionMapper.toResponse(repository.save(transaction));
     }
 
     @Transactional(readOnly = true)
@@ -100,6 +102,8 @@ public class TransactionService {
         validateCategory(userId, request.categoryId(), request.type());
         validateRealizedStatus(request.type(), request.status());
         Account newAccount = accountForNewImpact(userId, request.accountId(), request.type(), request.status());
+        BigDecimal newImpact = projectedImpact(request.amount(), request.type(), request.status());
+        validateSufficientBalanceForReplacement(newAccount, request.accountId(), oldAccountId, oldImpact, newImpact);
 
         reverseImpact(userId, oldAccountId, oldImpact);
         transaction.updateDetails(
@@ -125,6 +129,7 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse markAsPaid(UUID userId, UUID transactionId, MarkTransactionAsPaidRequest request) {
+        categoryRepository();
         Transaction transaction = findOwnedTransaction(userId, transactionId);
         UUID oldAccountId = transaction.getAccountId();
         BigDecimal oldImpact = transaction.balanceImpact();
@@ -135,6 +140,11 @@ public class TransactionService {
             throw new BadRequestException("Conta obrigatoria para transacao realizada");
         }
         Account newAccount = findOwnedAccount(userId, newAccountId);
+        TransactionStatus newStatus = transaction.getType() == TransactionType.INCOME
+                ? TransactionStatus.RECEIVED
+                : TransactionStatus.PAID;
+        BigDecimal newImpact = projectedImpact(transaction.getAmount(), transaction.getType(), newStatus);
+        validateSufficientBalanceForReplacement(newAccount, newAccountId, oldAccountId, oldImpact, newImpact);
 
         reverseImpact(userId, oldAccountId, oldImpact);
         transaction.markAsPaid(newAccountId);
@@ -258,8 +268,37 @@ public class TransactionService {
         if (account == null || impact.compareTo(BigDecimal.ZERO) == 0) {
             return;
         }
+        validateSufficientBalance(account, impact);
         account.applyBalanceImpact(impact);
         accountRepository().save(account);
+    }
+
+    private void validateSufficientBalance(Account account, BigDecimal impact) {
+        if (account == null || impact.compareTo(BigDecimal.ZERO) >= 0) {
+            return;
+        }
+        if (account.getCurrentBalance().add(impact).compareTo(BigDecimal.ZERO) < 0) {
+            throw new BadRequestException("Saldo insuficiente na conta financeira");
+        }
+    }
+
+    private void validateSufficientBalanceForReplacement(
+            Account account,
+            UUID newAccountId,
+            UUID oldAccountId,
+            BigDecimal oldImpact,
+            BigDecimal newImpact
+    ) {
+        if (account == null || newImpact.compareTo(BigDecimal.ZERO) >= 0) {
+            return;
+        }
+        BigDecimal availableBalance = account.getCurrentBalance();
+        if (oldAccountId != null && oldAccountId.equals(newAccountId)) {
+            availableBalance = availableBalance.subtract(oldImpact);
+        }
+        if (availableBalance.add(newImpact).compareTo(BigDecimal.ZERO) < 0) {
+            throw new BadRequestException("Saldo insuficiente na conta financeira");
+        }
     }
 
     private String normalizeOptional(String value) {

@@ -130,6 +130,7 @@ Funcionalidades administrativas interessantes para evolução:
 - Status: pendente, pago/recebido e cancelado.
 - Receita recebida aumenta saldo da conta.
 - Despesa paga diminui saldo da conta.
+- Despesa paga deve ser bloqueada quando a conta financeira nao tiver saldo suficiente.
 - Transações pendentes não alteram saldo realizado, mas compõem saldo previsto.
 
 ### Contas a pagar
@@ -138,6 +139,7 @@ Funcionalidades administrativas interessantes para evolução:
 - Listar próximas contas e contas vencidas.
 - Marcar como paga.
 - Ao pagar, registrar ou atualizar despesa correspondente.
+- Bloquear pagamento quando a conta financeira nao tiver saldo suficiente.
 - Destacar visualmente vencimentos próximos e atrasados.
 
 ### Despesas recorrentes

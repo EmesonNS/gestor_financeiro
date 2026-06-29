@@ -1,13 +1,13 @@
-import { AxiosError } from 'axios';
 import { ArrowLeft } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 
 import { useAccount, useAccounts } from '../../accounts/hooks/useAccounts';
 import type { Account } from '../../accounts/types/accounts.types';
-import type { ApiErrorResponse } from '../../auth/types/auth.types';
+import { hasSufficientBalance, insufficientBalanceMessage, type PreviousBalanceImpact } from '../../accounts/utils/balance-validation';
 import { useCategories, useCategory } from '../../categories/hooks/useCategories';
 import type { Category } from '../../categories/types/categories.types';
+import { apiErrorMessage } from '../../../shared/lib/api-error';
 import { TransactionForm } from '../components/TransactionForm';
 import { useCreateTransaction, useTransaction, useUpdateTransaction } from '../hooks/useTransactions';
 import type { TransactionFormData } from '../schemas/transaction.schemas';
@@ -45,6 +45,20 @@ export function TransactionFormPage() {
 
   async function submit(data: TransactionFormData) {
     setSubmitError(null);
+    const selectedAccount = accounts.find((account) => account.id === data.accountId);
+    const previousImpact: PreviousBalanceImpact | undefined = transaction
+      ? {
+          accountId: transaction.accountId,
+          amount: Number(transaction.amount),
+          direction: transaction.type === 'EXPENSE' && transaction.status === 'PAID' ? 'debit' : transaction.type === 'INCOME' && transaction.status === 'RECEIVED' ? 'credit' : 'none',
+        }
+      : undefined;
+
+    if (data.type === 'EXPENSE' && data.status === 'PAID' && selectedAccount && !hasSufficientBalance(selectedAccount, data.amount, previousImpact)) {
+      setSubmitError(insufficientBalanceMessage(selectedAccount));
+      return;
+    }
+
     const payload = {
       accountId: data.accountId || null,
       amount: data.amount,
@@ -64,8 +78,7 @@ export function TransactionFormPage() {
       }
       navigate('/transactions', { replace: true });
     } catch (error) {
-      const message = error instanceof AxiosError ? (error.response?.data as ApiErrorResponse | undefined)?.message : null;
-      setSubmitError(message ?? 'Nao foi possivel salvar a transacao.');
+      setSubmitError(apiErrorMessage(error, 'Nao foi possivel salvar a transacao.'));
     }
   }
 

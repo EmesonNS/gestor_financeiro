@@ -8,6 +8,8 @@ import { AccountStatusPage } from '../../features/auth/pages/AccountStatusPage';
 import { ForgotPasswordPage } from '../../features/auth/pages/ForgotPasswordPage';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterPage } from '../../features/auth/pages/RegisterPage';
+import { BillFormPage } from '../../features/bills/pages/BillFormPage';
+import { BillsPage } from '../../features/bills/pages/BillsPage';
 import { CategoriesPage } from '../../features/categories/pages/CategoriesPage';
 import { CategoryFormPage } from '../../features/categories/pages/CategoryFormPage';
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
@@ -44,6 +46,9 @@ export function AppRoutes() {
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/transactions/new" element={<TransactionFormPage />} />
           <Route path="/transactions/:id/edit" element={<TransactionFormPage />} />
+          <Route path="/bills" element={<BillsPage />} />
+          <Route path="/bills/new" element={<BillFormPage />} />
+          <Route path="/bills/:id/edit" element={<BillFormPage />} />
         </Route>
       </Route>
 

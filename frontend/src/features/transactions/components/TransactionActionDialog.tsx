@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { Button } from '../../../shared/ui/Button';
 import type { Account } from '../../accounts/types/accounts.types';
+import { hasSufficientBalance, insufficientBalanceMessage } from '../../accounts/utils/balance-validation';
 import type { MarkTransactionAsPaidPayload, Transaction } from '../types/transactions.types';
 import { formatCurrency, realizedStatusFor } from '../utils/transaction-format';
 
@@ -18,21 +19,23 @@ type TransactionActionDialogProps = {
 
 export function TransactionActionDialog({ accounts, action, isLoading, onClose, onConfirm, transaction }: TransactionActionDialogProps) {
   const [formState, setFormState] = useState({ accountId: '', paidDate: '', transactionId: '' });
+  const [error, setError] = useState<string | null>(null);
 
   if (!action || !transaction) {
     return null;
   }
+  const activeTransaction = transaction;
 
   const currentFormState =
-    formState.transactionId === transaction.id
+    formState.transactionId === activeTransaction.id
       ? formState
       : {
-          accountId: transaction.accountId ?? '',
-          paidDate: transaction.transactionDate,
-          transactionId: transaction.id,
+          accountId: activeTransaction.accountId ?? '',
+          paidDate: activeTransaction.transactionDate,
+          transactionId: activeTransaction.id,
         };
   const isMarkAsPaid = action === 'mark-as-paid';
-  const realizedLabel = transaction.type === 'EXPENSE' ? 'paga' : 'recebida';
+  const realizedLabel = activeTransaction.type === 'EXPENSE' ? 'paga' : 'recebida';
   const titles = {
     cancel: 'Cancelar transacao',
     delete: 'Excluir transacao',
@@ -41,15 +44,24 @@ export function TransactionActionDialog({ accounts, action, isLoading, onClose, 
   const descriptions = {
     cancel: 'O backend reverte o impacto de saldo quando esta transacao ja estiver realizada.',
     delete: 'A exclusao remove a transacao e reverte o saldo quando houver impacto realizado.',
-    'mark-as-paid': `A transacao mudara para ${realizedStatusFor(transaction.type).toLowerCase()} e o saldo da conta selecionada sera atualizado.`,
+    'mark-as-paid': `A transacao mudara para ${realizedStatusFor(activeTransaction.type).toLowerCase()} e o saldo da conta selecionada sera atualizado.`,
   };
 
   function confirm() {
     if (isMarkAsPaid) {
+      const selectedAccount = accounts.find((account) => account.id === currentFormState.accountId);
+
+      if (activeTransaction.type === 'EXPENSE' && selectedAccount && !hasSufficientBalance(selectedAccount, Number(activeTransaction.amount))) {
+        setError(insufficientBalanceMessage(selectedAccount));
+        return;
+      }
+
+      setError(null);
       onConfirm({ accountId: currentFormState.accountId || null, paidDate: currentFormState.paidDate || null });
       return;
     }
 
+    setError(null);
     onConfirm();
   }
 
@@ -59,39 +71,42 @@ export function TransactionActionDialog({ accounts, action, isLoading, onClose, 
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-fuchsia-300">Transacoes</p>
         <h2 className="mt-3 font-serif text-2xl font-semibold text-[#f7ecff]">{titles[action]}</h2>
         <p className="mt-3 text-sm leading-6 text-[#c8a9d8]">
-          {descriptions[action]} Lancamento: <strong className="text-[#f7ecff]">{transaction.description}</strong>, valor{' '}
-          <strong className="text-[#f7ecff]">{formatCurrency(transaction.amount)}</strong>.
+          {descriptions[action]} Lancamento: <strong className="text-[#f7ecff]">{activeTransaction.description}</strong>, valor{' '}
+          <strong className="text-[#f7ecff]">{formatCurrency(activeTransaction.amount)}</strong>.
         </p>
 
         {isMarkAsPaid ? (
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <label className="block text-sm font-medium text-[#dcc3e8]" htmlFor="markPaidAccountId">
-              Conta
-              <select
-                className="mt-2 min-h-11 w-full rounded-lg border border-[#5a3a6e] bg-[#24112f] px-3 py-2 text-[#f7ecff] outline-none transition focus:border-fuchsia-400 focus:ring-4 focus:ring-fuchsia-500/20"
-                id="markPaidAccountId"
-                onChange={(event) => setFormState({ ...currentFormState, accountId: event.target.value })}
-                value={currentFormState.accountId}
-              >
-                <option value="">Selecione uma conta</option>
-                {accounts.map((account) => (
-                  <option key={account.id} value={account.id}>
-                    {account.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block text-sm font-medium text-[#dcc3e8]" htmlFor="markPaidDate">
-              Data
-              <input
-                className="mt-2 min-h-11 w-full rounded-lg border border-[#5a3a6e] bg-[#24112f] px-3 py-2 text-[#f7ecff] outline-none transition focus:border-fuchsia-400 focus:ring-4 focus:ring-fuchsia-500/20"
-                id="markPaidDate"
-                onChange={(event) => setFormState({ ...currentFormState, paidDate: event.target.value })}
-                type="date"
-                value={currentFormState.paidDate}
-              />
-            </label>
-          </div>
+          <>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-medium text-[#dcc3e8]" htmlFor="markPaidAccountId">
+                Conta
+                <select
+                  className="mt-2 min-h-11 w-full rounded-lg border border-[#5a3a6e] bg-[#24112f] px-3 py-2 text-[#f7ecff] outline-none transition focus:border-fuchsia-400 focus:ring-4 focus:ring-fuchsia-500/20"
+                  id="markPaidAccountId"
+                  onChange={(event) => setFormState({ ...currentFormState, accountId: event.target.value })}
+                  value={currentFormState.accountId}
+                >
+                  <option value="">Selecione uma conta</option>
+                  {accounts.map((account) => (
+                    <option key={account.id} value={account.id}>
+                      {account.name} - saldo {formatCurrency(account.currentBalance)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-sm font-medium text-[#dcc3e8]" htmlFor="markPaidDate">
+                Data
+                <input
+                  className="mt-2 min-h-11 w-full rounded-lg border border-[#5a3a6e] bg-[#24112f] px-3 py-2 text-[#f7ecff] outline-none transition focus:border-fuchsia-400 focus:ring-4 focus:ring-fuchsia-500/20"
+                  id="markPaidDate"
+                  onChange={(event) => setFormState({ ...currentFormState, paidDate: event.target.value })}
+                  type="date"
+                  value={currentFormState.paidDate}
+                />
+              </label>
+            </div>
+            {error ? <p className="mt-4 rounded-lg border border-rose-300/25 bg-rose-400/10 px-3 py-2 text-sm font-medium text-rose-200">{error}</p> : null}
+          </>
         ) : null}
 
         <div className="mt-6 flex flex-wrap justify-end gap-3">

@@ -121,6 +121,7 @@ src/main/java/com/zorysa/finance
 
 - Receitas e despesas pagas, pendentes e canceladas.
 - Impacto e reversão de saldo em criação, edição, pagamento, cancelamento e exclusão.
+- Bloqueio de debitos quando a conta financeira nao tiver saldo suficiente para a despesa paga.
 
 ### bills
 
@@ -271,6 +272,7 @@ Testes mínimos:
 - Autorização de endpoints administrativos apenas para admin.
 - Isolamento de dados entre usuários.
 - Criação, edição e exclusão de transação paga com ajuste de saldo.
+- Bloqueio de transacao de despesa paga quando a conta nao tiver saldo suficiente.
 - Orçamento e cálculo de consumo.
 - Conta a pagar e pagamento com transação vinculada.
 - Criação de cartão.

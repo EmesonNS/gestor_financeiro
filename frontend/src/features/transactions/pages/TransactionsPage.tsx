@@ -1,12 +1,11 @@
-import { AxiosError } from 'axios';
 import { ArrowDownUp, ChevronLeft, ChevronRight, Plus, ReceiptText } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
 import { Button } from '../../../shared/ui/Button';
+import { apiErrorMessage } from '../../../shared/lib/api-error';
 import { useAccounts } from '../../accounts/hooks/useAccounts';
 import { useCategories } from '../../categories/hooks/useCategories';
-import type { ApiErrorResponse } from '../../auth/types/auth.types';
 import { TransactionActionDialog } from '../components/TransactionActionDialog';
 import { TransactionCard } from '../components/TransactionCard';
 import {
@@ -107,8 +106,7 @@ export function TransactionsPage() {
 
       setDialog(null);
     } catch (error) {
-      const message = error instanceof AxiosError ? (error.response?.data as ApiErrorResponse | undefined)?.message : null;
-      setActionError(message ?? 'Nao foi possivel concluir a acao da transacao.');
+      setActionError(apiErrorMessage(error, 'Nao foi possivel concluir a acao da transacao.'));
     }
   }
 

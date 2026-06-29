@@ -314,6 +314,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 - Body: `{ "description": "Mercado", "amount": 150.25, "type": "EXPENSE", "transactionDate": "2026-06-20", "categoryId": "uuid", "accountId": "uuid", "status": "PAID", "notes": "" }`.
 - Response 201.
 - Regra: se paga/recebida, ajustar saldo.
+- Erro 400: despesa paga deve retornar `INSUFFICIENT_ACCOUNT_BALANCE` quando a conta nao tiver saldo suficiente.
 
 ### GET `/api/transactions/{id}`
 
@@ -327,6 +328,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 - Body: igual criação.
 - Response 200.
 - Regra: reverter impacto anterior e aplicar novo impacto quando necessário.
+- Erro 400: deve retornar `INSUFFICIENT_ACCOUNT_BALANCE` quando a alteracao gerar despesa paga maior que o saldo disponivel apos a reversao do impacto anterior.
 
 ### DELETE `/api/transactions/{id}`
 
@@ -340,6 +342,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 - Body opcional: `{ "accountId": "uuid", "paidDate": "2026-06-20" }`.
 - Response 200.
 - Regra: aplica impacto no saldo.
+- Erro 400: despesa marcada como paga deve retornar `INSUFFICIENT_ACCOUNT_BALANCE` quando a conta nao tiver saldo suficiente.
 
 ### PATCH `/api/transactions/{id}/cancel`
 
@@ -384,6 +387,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 - Body: `{ "accountId": "uuid", "paidAt": "2026-06-20" }`.
 - Response 200.
 - Regra: cria ou atualiza despesa correspondente.
+- Erro 400: deve retornar `INSUFFICIENT_ACCOUNT_BALANCE` quando a conta nao tiver saldo suficiente para pagar a conta.
 
 ## Budgets
 
