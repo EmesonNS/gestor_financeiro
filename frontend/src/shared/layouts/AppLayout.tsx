@@ -7,6 +7,7 @@ export function AppLayout() {
   const location = useLocation();
   const { isAdmin, logout } = useAuth();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isCreditCardRoute = location.pathname.startsWith('/credit-cards') || location.pathname.startsWith('/card-purchases');
 
   return (
     <div className="app-shell min-h-screen text-white">
@@ -86,13 +87,23 @@ export function AppLayout() {
             </Link>
             <Link
               className={
-                location.pathname.startsWith('/credit-cards')
+                isCreditCardRoute
                   ? 'font-semibold text-white'
                   : 'hover:text-white'
               }
               to="/credit-cards"
             >
               Cartoes
+            </Link>
+            <Link
+              className={
+                location.pathname.startsWith('/installments')
+                  ? 'font-semibold text-white'
+                  : 'hover:text-white'
+              }
+              to="/installments/future"
+            >
+              Parcelas
             </Link>
             <Link
               className={

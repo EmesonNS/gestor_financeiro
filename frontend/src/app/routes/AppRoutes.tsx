@@ -20,6 +20,10 @@ import { CreditCardsPage } from '../../features/credit-cards/pages/CreditCardsPa
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
 import { GoalFormPage } from '../../features/goals/pages/GoalFormPage';
 import { GoalsPage } from '../../features/goals/pages/GoalsPage';
+import { CardPurchaseDetailsPage } from '../../features/installments/pages/CardPurchaseDetailsPage';
+import { CardPurchaseFormPage } from '../../features/installments/pages/CardPurchaseFormPage';
+import { CardPurchasesPage } from '../../features/installments/pages/CardPurchasesPage';
+import { FutureInstallmentsPage } from '../../features/installments/pages/FutureInstallmentsPage';
 import { CardInvoicesPage } from '../../features/invoices/pages/CardInvoicesPage';
 import { InvoiceDetailsPage } from '../../features/invoices/pages/InvoiceDetailsPage';
 import { ProfilePage } from '../../features/profile/pages/ProfilePage';
@@ -71,6 +75,11 @@ export function AppRoutes() {
           <Route path="/credit-cards/:cardId/invoices" element={<CardInvoicesPage />} />
           <Route path="/credit-cards/:cardId/invoices/current" element={<CardInvoicesPage />} />
           <Route path="/invoices/:invoiceId" element={<InvoiceDetailsPage />} />
+          <Route path="/credit-cards/:cardId/purchases" element={<CardPurchasesPage />} />
+          <Route path="/credit-cards/:cardId/purchases/new" element={<CardPurchaseFormPage />} />
+          <Route path="/card-purchases/:purchaseId" element={<CardPurchaseDetailsPage />} />
+          <Route path="/card-purchases/:purchaseId/edit" element={<CardPurchaseFormPage />} />
+          <Route path="/installments/future" element={<FutureInstallmentsPage />} />
         </Route>
       </Route>
 

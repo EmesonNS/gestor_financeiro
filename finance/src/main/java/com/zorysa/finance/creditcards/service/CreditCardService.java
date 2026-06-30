@@ -6,6 +6,7 @@ import com.zorysa.finance.creditcards.dto.UpdateCreditCardRequest;
 import com.zorysa.finance.creditcards.entity.CreditCard;
 import com.zorysa.finance.creditcards.mapper.CreditCardMapper;
 import com.zorysa.finance.creditcards.repository.CreditCardRepository;
+import com.zorysa.finance.installments.repository.CreditCardInstallmentRepository;
 import com.zorysa.finance.shared.exception.BadRequestException;
 import com.zorysa.finance.shared.exception.NotFoundException;
 import java.math.BigDecimal;
@@ -20,10 +21,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class CreditCardService {
 
     private final ObjectProvider<CreditCardRepository> creditCardRepository;
+    private final ObjectProvider<CreditCardInstallmentRepository> installmentRepository;
     private final CreditCardMapper creditCardMapper;
 
-    public CreditCardService(ObjectProvider<CreditCardRepository> creditCardRepository, CreditCardMapper creditCardMapper) {
+    public CreditCardService(
+            ObjectProvider<CreditCardRepository> creditCardRepository,
+            ObjectProvider<CreditCardInstallmentRepository> installmentRepository,
+            CreditCardMapper creditCardMapper
+    ) {
         this.creditCardRepository = creditCardRepository;
+        this.installmentRepository = installmentRepository;
         this.creditCardMapper = creditCardMapper;
     }
 
@@ -84,7 +91,11 @@ public class CreditCardService {
     @Transactional(readOnly = true)
     public BigDecimal calculateUsedLimit(UUID userId, UUID creditCardId) {
         findOwnedCreditCard(userId, creditCardId);
-        return BigDecimal.ZERO;
+        CreditCardInstallmentRepository repository = installmentRepository.getIfAvailable();
+        if (repository == null) {
+            return BigDecimal.ZERO;
+        }
+        return repository.sumOpenAmountByUserIdAndCreditCardId(userId, creditCardId);
     }
 
     public BigDecimal calculateAvailableLimit(BigDecimal limitAmount, BigDecimal usedLimit) {

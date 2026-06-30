@@ -10,6 +10,8 @@ import com.zorysa.finance.invoices.entity.CreditCardInvoice;
 import com.zorysa.finance.invoices.entity.InvoiceStatus;
 import com.zorysa.finance.invoices.mapper.InvoiceMapper;
 import com.zorysa.finance.invoices.repository.InvoiceRepository;
+import com.zorysa.finance.installments.entity.CreditCardInstallment;
+import com.zorysa.finance.installments.repository.CreditCardInstallmentRepository;
 import com.zorysa.finance.shared.exception.BadRequestException;
 import com.zorysa.finance.shared.exception.NotFoundException;
 import jakarta.persistence.criteria.Predicate;
@@ -32,17 +34,20 @@ public class InvoiceService {
     private final ObjectProvider<InvoiceRepository> invoiceRepository;
     private final ObjectProvider<CreditCardRepository> creditCardRepository;
     private final ObjectProvider<AccountRepository> accountRepository;
+    private final ObjectProvider<CreditCardInstallmentRepository> installmentRepository;
     private final InvoiceMapper invoiceMapper;
 
     public InvoiceService(
             ObjectProvider<InvoiceRepository> invoiceRepository,
             ObjectProvider<CreditCardRepository> creditCardRepository,
             ObjectProvider<AccountRepository> accountRepository,
+            ObjectProvider<CreditCardInstallmentRepository> installmentRepository,
             InvoiceMapper invoiceMapper
     ) {
         this.invoiceRepository = invoiceRepository;
         this.creditCardRepository = creditCardRepository;
         this.accountRepository = accountRepository;
+        this.installmentRepository = installmentRepository;
         this.invoiceMapper = invoiceMapper;
     }
 
@@ -74,6 +79,7 @@ public class InvoiceService {
         validateCanPay(invoice);
         Account account = findOwnedAccount(userId, request.paymentAccountId());
         applyPaymentBalanceImpact(account, invoice.getTotalAmount());
+        installmentRepository().findAllByInvoiceId(invoiceId).forEach(CreditCardInstallment::markAsPaid);
         invoice.markAsPaid(request.paymentAccountId(), request.paidAt());
         accountRepository().save(account);
         return invoiceMapper.toResponse(invoiceRepository().save(invoice));
@@ -101,7 +107,18 @@ public class InvoiceService {
 
     @Transactional(readOnly = true)
     public BigDecimal calculateTotalAmount(UUID invoiceId) {
-        return BigDecimal.ZERO;
+        if (invoiceId == null) {
+            return BigDecimal.ZERO;
+        }
+        return installmentRepository().sumAmountByInvoiceId(invoiceId);
+    }
+
+    @Transactional
+    public void refreshInvoiceTotal(UUID invoiceId) {
+        CreditCardInvoice invoice = invoiceRepository().findById(invoiceId)
+                .orElseThrow(() -> new NotFoundException("Fatura nao encontrada"));
+        invoice.updateTotalAmount(calculateTotalAmount(invoiceId));
+        invoiceRepository().save(invoice);
     }
 
     public LocalDate calculateClosingDate(int referenceMonth, int referenceYear, int closingDay) {
@@ -183,6 +200,12 @@ public class InvoiceService {
     private AccountRepository accountRepository() {
         return accountRepository.getIfAvailable(() -> {
             throw new IllegalStateException("AccountRepository nao disponivel");
+        });
+    }
+
+    private CreditCardInstallmentRepository installmentRepository() {
+        return installmentRepository.getIfAvailable(() -> {
+            throw new IllegalStateException("CreditCardInstallmentRepository nao disponivel");
         });
     }
 }

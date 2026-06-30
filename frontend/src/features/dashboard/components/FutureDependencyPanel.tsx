@@ -1,10 +1,12 @@
 import { Clock3 } from 'lucide-react';
 
-const futureItems = [
-  'Compras e parcelas futuras: apos etapa 13',
-];
+const futureItems: string[] = [];
 
 export function FutureDependencyPanel() {
+  if (!futureItems.length) {
+    return null;
+  }
+
   return (
     <section className="app-panel-muted p-5">
       <div className="flex items-start gap-3">

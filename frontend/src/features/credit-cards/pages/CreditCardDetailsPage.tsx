@@ -1,7 +1,6 @@
-import { ArrowLeft, Archive, Pencil, ReceiptText } from 'lucide-react';
+import { ArrowLeft, Archive, Pencil, ReceiptText, ShoppingBag } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 
-import { Button } from '../../../shared/ui/Button';
 import { CardLimitSummary } from '../components/CardLimitSummary';
 import { useCreditCard } from '../hooks/useCreditCards';
 import { formatDateTime } from '../utils/credit-card-format';
@@ -39,6 +38,9 @@ export function CreditCardDetailsPage() {
         <Link className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-fuchsia-600 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-fuchsia-950/30 hover:bg-fuchsia-500" to={`/credit-cards/${card.id}/invoices`}>
           <ReceiptText size={16} /> Faturas
         </Link>
+        <Link className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-fuchsia-600 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-fuchsia-950/30 hover:bg-fuchsia-500" to={`/credit-cards/${card.id}/purchases`}>
+          <ShoppingBag size={16} /> Compras
+        </Link>
       </div>
 
       <div className="app-page-hero">
@@ -74,12 +76,9 @@ export function CreditCardDetailsPage() {
       </section>
 
       <section className="app-panel-muted p-5">
-        <p className="app-eyebrow">Proximas etapas</p>
-        <h2 className="mt-2 font-serif text-2xl font-semibold text-[#f7ecff]">Compras e parcelas entram na etapa 13</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#c8a9d8]">As faturas ja estao disponiveis. O detalhamento por compra sera ligado quando o modulo de compras parceladas for implementado.</p>
-        <Button className="mt-4" disabled type="button" variant="secondary">
-          Compras ainda nao disponiveis
-        </Button>
+        <p className="app-eyebrow">Operacao</p>
+        <h2 className="mt-2 font-serif text-2xl font-semibold text-[#f7ecff]">Faturas e compras conectadas</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#c8a9d8]">Compras no cartao geram parcelas, alimentam faturas e atualizam o limite usado sem movimentar saldo de conta ate o pagamento da fatura.</p>
       </section>
     </section>
   );
