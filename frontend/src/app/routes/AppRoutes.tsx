@@ -27,6 +27,7 @@ import { FutureInstallmentsPage } from '../../features/installments/pages/Future
 import { CardInvoicesPage } from '../../features/invoices/pages/CardInvoicesPage';
 import { InvoiceDetailsPage } from '../../features/invoices/pages/InvoiceDetailsPage';
 import { ProfilePage } from '../../features/profile/pages/ProfilePage';
+import { ReportsPage } from '../../features/reports/pages/ReportsPage';
 import { TransactionFormPage } from '../../features/transactions/pages/TransactionFormPage';
 import { TransactionsPage } from '../../features/transactions/pages/TransactionsPage';
 import { AppLayout } from '../../shared/layouts/AppLayout';
@@ -80,6 +81,7 @@ export function AppRoutes() {
           <Route path="/card-purchases/:purchaseId" element={<CardPurchaseDetailsPage />} />
           <Route path="/card-purchases/:purchaseId/edit" element={<CardPurchaseFormPage />} />
           <Route path="/installments/future" element={<FutureInstallmentsPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
         </Route>
       </Route>
 
