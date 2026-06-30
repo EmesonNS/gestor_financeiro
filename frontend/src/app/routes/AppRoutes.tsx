@@ -20,6 +20,8 @@ import { CreditCardsPage } from '../../features/credit-cards/pages/CreditCardsPa
 import { DashboardPage } from '../../features/dashboard/pages/DashboardPage';
 import { GoalFormPage } from '../../features/goals/pages/GoalFormPage';
 import { GoalsPage } from '../../features/goals/pages/GoalsPage';
+import { CardInvoicesPage } from '../../features/invoices/pages/CardInvoicesPage';
+import { InvoiceDetailsPage } from '../../features/invoices/pages/InvoiceDetailsPage';
 import { ProfilePage } from '../../features/profile/pages/ProfilePage';
 import { TransactionFormPage } from '../../features/transactions/pages/TransactionFormPage';
 import { TransactionsPage } from '../../features/transactions/pages/TransactionsPage';
@@ -66,6 +68,9 @@ export function AppRoutes() {
           <Route path="/credit-cards/new" element={<CreditCardFormPage />} />
           <Route path="/credit-cards/:id" element={<CreditCardDetailsPage />} />
           <Route path="/credit-cards/:id/edit" element={<CreditCardFormPage />} />
+          <Route path="/credit-cards/:cardId/invoices" element={<CardInvoicesPage />} />
+          <Route path="/credit-cards/:cardId/invoices/current" element={<CardInvoicesPage />} />
+          <Route path="/invoices/:invoiceId" element={<InvoiceDetailsPage />} />
         </Route>
       </Route>
 

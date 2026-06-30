@@ -1,4 +1,4 @@
-import { ArrowLeft, Archive, Pencil } from 'lucide-react';
+import { ArrowLeft, Archive, Pencil, ReceiptText } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 
 import { Button } from '../../../shared/ui/Button';
@@ -36,6 +36,9 @@ export function CreditCardDetailsPage() {
         <Link className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/10 px-3 py-2 text-sm font-semibold text-fuchsia-50 hover:bg-white/15" to={`/credit-cards/${card.id}/edit`}>
           <Pencil size={16} /> Editar
         </Link>
+        <Link className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-fuchsia-600 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-fuchsia-950/30 hover:bg-fuchsia-500" to={`/credit-cards/${card.id}/invoices`}>
+          <ReceiptText size={16} /> Faturas
+        </Link>
       </div>
 
       <div className="app-page-hero">
@@ -72,10 +75,10 @@ export function CreditCardDetailsPage() {
 
       <section className="app-panel-muted p-5">
         <p className="app-eyebrow">Proximas etapas</p>
-        <h2 className="mt-2 font-serif text-2xl font-semibold text-[#f7ecff]">Faturas e compras entram nas etapas 12 e 13</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#c8a9d8]">Esta tela fica preparada para receber fatura atual, historico e compras quando esses modulos forem liberados no frontend.</p>
+        <h2 className="mt-2 font-serif text-2xl font-semibold text-[#f7ecff]">Compras e parcelas entram na etapa 13</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#c8a9d8]">As faturas ja estao disponiveis. O detalhamento por compra sera ligado quando o modulo de compras parceladas for implementado.</p>
         <Button className="mt-4" disabled type="button" variant="secondary">
-          Faturas ainda nao disponiveis
+          Compras ainda nao disponiveis
         </Button>
       </section>
     </section>
