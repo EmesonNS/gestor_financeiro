@@ -101,7 +101,9 @@ class InstallmentApiSecurityIntegrationTest {
                         .param("size", "20")
                         .param("cardId", CARD_ID.toString())
                         .param("fromMonth", "6")
-                        .param("fromYear", "2026"))
+                        .param("fromYear", "2026")
+                        .param("toMonth", "12")
+                        .param("toYear", "2026"))
                 .andExpect(status().isUnauthorized());
         mockMvc.perform(get("/api/card-purchases/{purchaseId}/installments", PURCHASE_ID)
                         .param("page", "0")

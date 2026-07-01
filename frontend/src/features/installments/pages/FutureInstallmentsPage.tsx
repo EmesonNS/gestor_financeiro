@@ -13,11 +13,15 @@ export function FutureInstallmentsPage() {
   const [cardId, setCardId] = useState('');
   const [fromMonth, setFromMonth] = useState(currentDate.getMonth() + 1);
   const [fromYear, setFromYear] = useState(currentDate.getFullYear());
+  const [toMonth, setToMonth] = useState<number | ''>('');
+  const [toYear, setToYear] = useState<number | ''>('');
   const installmentsQuery = useFutureInstallments({
     cardId: cardId || undefined,
     fromMonth,
     fromYear,
     page,
+    toMonth: toMonth || undefined,
+    toYear: toYear || undefined,
   });
   const cardsQuery = useCreditCards({ archived: false, page: 0 });
   const installments = installmentsQuery.data?.content ?? [];
@@ -36,7 +40,7 @@ export function FutureInstallmentsPage() {
           <div>
             <p className="app-eyebrow">Parcelas futuras</p>
             <h1 className="app-hero-title mt-4">Compromissos no cartao</h1>
-            <p className="app-hero-copy mt-4 max-w-2xl">Veja parcelas abertas a partir de uma competencia e acompanhe faturas futuras.</p>
+            <p className="app-hero-copy mt-4 max-w-2xl">Veja parcelas abertas dentro de um intervalo de competencias e acompanhe faturas futuras.</p>
           </div>
 
           <div className="app-panel-muted grid min-w-56 gap-3 p-4">
@@ -48,7 +52,7 @@ export function FutureInstallmentsPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 rounded-lg border border-white/10 bg-white/10 p-3 backdrop-blur md:grid-cols-3">
+      <div className="grid gap-3 rounded-lg border border-white/10 bg-white/10 p-3 backdrop-blur md:grid-cols-5">
         <label className="block text-sm font-medium text-[#dcc3e8]" htmlFor="futureCardId">
           Cartao
           <select
@@ -93,11 +97,53 @@ export function FutureInstallmentsPage() {
             max="2100"
             min="2000"
             onChange={(event) => {
-              setFromYear(Number(event.target.value));
+              const nextFromYear = Number(event.target.value);
+              setFromYear(nextFromYear);
+              if (toMonth && !toYear) {
+                setToYear(nextFromYear);
+              }
               resetPage();
             }}
             type="number"
             value={fromYear}
+          />
+        </label>
+
+        <label className="block text-sm font-medium text-[#dcc3e8]" htmlFor="futureToMonth">
+          Mes final
+          <input
+            className="mt-2 min-h-11 w-full rounded-lg border border-[#5a3a6e] bg-[#24112f] px-3 py-2 text-[#f7ecff] outline-none transition focus:border-fuchsia-400 focus:ring-4 focus:ring-fuchsia-500/20"
+            id="futureToMonth"
+            max="12"
+            min="1"
+            onChange={(event) => {
+              const nextToMonth = event.target.value ? Number(event.target.value) : '';
+              setToMonth(nextToMonth);
+              if (nextToMonth && !toYear) {
+                setToYear(fromYear);
+              }
+              resetPage();
+            }}
+            placeholder="Opcional"
+            type="number"
+            value={toMonth}
+          />
+        </label>
+
+        <label className="block text-sm font-medium text-[#dcc3e8]" htmlFor="futureToYear">
+          Ano final
+          <input
+            className="mt-2 min-h-11 w-full rounded-lg border border-[#5a3a6e] bg-[#24112f] px-3 py-2 text-[#f7ecff] outline-none transition focus:border-fuchsia-400 focus:ring-4 focus:ring-fuchsia-500/20"
+            id="futureToYear"
+            max="2100"
+            min="2000"
+            onChange={(event) => {
+              setToYear(event.target.value ? Number(event.target.value) : toMonth ? fromYear : '');
+              resetPage();
+            }}
+            placeholder="Opcional"
+            type="number"
+            value={toYear}
           />
         </label>
       </div>

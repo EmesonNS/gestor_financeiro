@@ -22,6 +22,8 @@ export type ReportFilters = {
   month?: number;
   page: number;
   startDate?: string;
+  toMonth?: number;
+  toYear?: number;
   type?: TransactionType;
   year?: number;
 };

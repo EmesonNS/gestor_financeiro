@@ -121,6 +121,21 @@ public class InvoiceService {
         invoiceRepository().save(invoice);
     }
 
+    @Transactional
+    public void rescheduleUnpaidInvoicesForCreditCard(UUID userId, UUID creditCardId, int closingDay, int dueDay) {
+        List<CreditCardInvoice> invoices = invoiceRepository()
+                .findAllByUserIdAndCreditCardIdAndStatusNot(userId, creditCardId, InvoiceStatus.PAID);
+        invoices.forEach(invoice -> recalculateInvoiceDates(invoice, closingDay, dueDay));
+        invoiceRepository().saveAll(invoices);
+    }
+
+    public void recalculateInvoiceDates(CreditCardInvoice invoice, int closingDay, int dueDay) {
+        invoice.reschedule(
+                calculateClosingDate(invoice.getReferenceMonth(), invoice.getReferenceYear(), closingDay),
+                calculateDueDate(invoice.getReferenceMonth(), invoice.getReferenceYear(), dueDay, closingDay)
+        );
+    }
+
     public LocalDate calculateClosingDate(int referenceMonth, int referenceYear, int closingDay) {
         YearMonth month = YearMonth.of(referenceYear, referenceMonth);
         return month.atDay(Math.min(closingDay, month.lengthOfMonth()));

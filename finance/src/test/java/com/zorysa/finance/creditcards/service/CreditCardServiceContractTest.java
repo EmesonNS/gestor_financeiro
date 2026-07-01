@@ -90,6 +90,26 @@ class CreditCardServiceContractTest {
                 .contains("validateCanReceivePurchases");
     }
 
+    @Test
+    void shouldRescheduleOpenInvoicesWhenBillingDaysChange() {
+        Class<?> service = findRequiredClass("com.zorysa.finance.creditcards.service.CreditCardService");
+
+        assertThat(fieldTypeNames(service))
+                .as("CreditCardService deve coordenar atualização de datas de faturas ao editar fechamento/vencimento")
+                .anySatisfy(typeName -> assertThat(typeName).contains("invoices").contains("InvoiceService"));
+        assertThat(methodNames(service))
+                .as("CreditCardService deve expor operação de sincronização de faturas não pagas do cartão")
+                .contains("rescheduleOpenInvoicesForBillingChange");
+
+        Method method = method(service, "rescheduleOpenInvoicesForBillingChange");
+
+        assertThat(method.getReturnType()).isEqualTo(Void.TYPE);
+        assertThat(parameterTypes(method)).contains(UUID.class);
+        assertThat(integerParameterCount(method))
+                .as("rescheduleOpenInvoicesForBillingChange deve receber closingDay e dueDay")
+                .isGreaterThanOrEqualTo(2);
+    }
+
     private void requiresAuthenticatedUserAndCardId(Method method) {
         assertThat(Arrays.stream(method.getParameterTypes()).filter(UUID.class::equals).count())
                 .as(method.getName() + " deve ter dois UUIDs: userId e creditCardId")
@@ -128,5 +148,17 @@ class CreditCardServiceContractTest {
         return Arrays.stream(type.getDeclaredMethods())
                 .map(Method::getName)
                 .toArray(String[]::new);
+    }
+
+    private String[] fieldTypeNames(Class<?> type) {
+        return Arrays.stream(type.getDeclaredFields())
+                .map(field -> field.getType().getName() + " " + field.getGenericType().getTypeName())
+                .toArray(String[]::new);
+    }
+
+    private long integerParameterCount(Method method) {
+        return Arrays.stream(method.getParameterTypes())
+                .filter(type -> type.equals(Integer.TYPE) || type.equals(Integer.class))
+                .count();
     }
 }

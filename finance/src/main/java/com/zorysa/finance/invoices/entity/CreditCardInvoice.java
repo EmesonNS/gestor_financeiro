@@ -158,6 +158,11 @@ public class CreditCardInvoice {
         this.totalAmount = totalAmount;
     }
 
+    public void reschedule(LocalDate closingDate, LocalDate dueDate) {
+        this.closingDate = closingDate;
+        this.dueDate = dueDate;
+    }
+
     public void markAsPaid(UUID paymentAccountId, LocalDate paidAt) {
         this.paymentAccountId = paymentAccountId;
         this.paidAt = paidAt;

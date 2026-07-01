@@ -100,6 +100,26 @@ class InvoiceServiceContractTest {
                 .contains("validateCanPay", "applyPaymentBalanceImpact");
     }
 
+    @Test
+    void shouldRescheduleOnlyUnpaidInvoicesWhenCreditCardBillingDaysChange() {
+        Class<?> service = findRequiredClass("com.zorysa.finance.invoices.service.InvoiceService");
+        Class<?> repository = findRequiredClass("com.zorysa.finance.invoices.repository.InvoiceRepository");
+
+        assertThat(methodNames(service))
+                .as("InvoiceService deve recalcular fechamento/vencimento de faturas não pagas do cartão")
+                .contains("rescheduleUnpaidInvoicesForCreditCard", "recalculateInvoiceDates");
+        Method method = method(service, "rescheduleUnpaidInvoicesForCreditCard");
+
+        assertThat(method.getReturnType()).isEqualTo(Void.TYPE);
+        assertThat(parameterTypes(method)).contains(UUID.class);
+        assertThat(integerParameterCount(method))
+                .as("rescheduleUnpaidInvoicesForCreditCard deve receber closingDay e dueDay")
+                .isGreaterThanOrEqualTo(2);
+        assertThat(methodNames(repository))
+                .as("InvoiceRepository deve buscar apenas faturas não pagas do cartão do usuário")
+                .contains("findAllByUserIdAndCreditCardIdAndStatusNot");
+    }
+
     private void requiresAuthenticatedUserAndResourceId(Method method) {
         assertThat(Arrays.stream(method.getParameterTypes()).filter(UUID.class::equals).count())
                 .as(method.getName() + " deve ter pelo menos userId e id do recurso")

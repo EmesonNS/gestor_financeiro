@@ -103,6 +103,17 @@ class InstallmentsModuleContractTest {
                 .doesNotContain(Pageable.class);
     }
 
+    @Test
+    void shouldExposeFutureInstallmentsRangeQueryParameters() {
+        Class<?> controller = findRequiredClass("com.zorysa.finance.installments.controller.InstallmentController");
+        Method method = mappedMethod(controller, "/installments/future");
+
+        assertThat(requestParamNames(method)).contains("cardId", "fromMonth", "fromYear", "toMonth", "toYear");
+        assertThat(Arrays.stream(method.getParameterTypes()).filter(Integer.class::equals).count())
+                .as("GET /api/installments/future deve aceitar fromMonth, fromYear, toMonth e toYear")
+                .isGreaterThanOrEqualTo(4);
+    }
+
     private void assertThatClassExists(String className) {
         findRequiredClass(className);
     }
@@ -160,6 +171,19 @@ class InstallmentsModuleContractTest {
 
     private MethodContract assertThatMethod(Method method) {
         return new MethodContract(method);
+    }
+
+    private String[] requestParamNames(Method method) {
+        return Arrays.stream(method.getParameters())
+                .filter(parameter -> parameter.isAnnotationPresent(org.springframework.web.bind.annotation.RequestParam.class))
+                .map(parameter -> {
+                    org.springframework.web.bind.annotation.RequestParam annotation =
+                            parameter.getAnnotation(org.springframework.web.bind.annotation.RequestParam.class);
+                    if (!annotation.name().isBlank()) return annotation.name();
+                    if (!annotation.value().isBlank()) return annotation.value();
+                    return parameter.getName();
+                })
+                .toArray(String[]::new);
     }
 
     private static class MethodContract {

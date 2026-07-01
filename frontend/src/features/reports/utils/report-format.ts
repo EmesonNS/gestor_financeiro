@@ -50,6 +50,8 @@ export function defaultReportFilters(): ReportFilters {
     fromYear: current.getFullYear(),
     month: current.getMonth() + 1,
     page: 0,
+    toMonth: undefined,
+    toYear: undefined,
     year: current.getFullYear(),
   };
 }

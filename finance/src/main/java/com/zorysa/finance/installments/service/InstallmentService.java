@@ -188,16 +188,40 @@ public class InstallmentService {
             UUID cardId,
             Integer fromMonth,
             Integer fromYear,
+            Integer toMonth,
+            Integer toYear,
             Pageable pageable
     ) {
         if (cardId != null) {
             findOwnedCreditCard(userId, cardId);
         }
+        validateInstallmentCompetenceRange(fromMonth, fromYear, toMonth, toYear);
         YearMonth from = fromMonth != null && fromYear != null
                 ? YearMonth.of(fromYear, fromMonth)
                 : YearMonth.now();
-        return installmentRepository().findAll(filterFutureInstallments(userId, cardId, from), pageable)
+        YearMonth to = toMonth != null && toYear != null
+                ? YearMonth.of(toYear, toMonth)
+                : null;
+        return installmentRepository().findAll(filterFutureInstallments(userId, cardId, from, to), pageable)
                 .map(installmentMapper::toInstallmentResponse);
+    }
+
+    public void validateInstallmentCompetenceRange(Integer fromMonth, Integer fromYear, Integer toMonth, Integer toYear) {
+        if ((fromMonth == null) != (fromYear == null)) {
+            throw new BadRequestException("Competencia inicial incompleta");
+        }
+        if ((toMonth == null) != (toYear == null)) {
+            throw new BadRequestException("Competencia final incompleta");
+        }
+        validateMonth(fromMonth, "fromMonth");
+        validateMonth(toMonth, "toMonth");
+        if (fromMonth != null && toMonth != null) {
+            YearMonth from = YearMonth.of(fromYear, fromMonth);
+            YearMonth to = YearMonth.of(toYear, toMonth);
+            if (to.isBefore(from)) {
+                throw new BadRequestException("Competencia final nao pode ser anterior a competencia inicial");
+            }
+        }
     }
 
     @Transactional(readOnly = true)
@@ -251,6 +275,12 @@ public class InstallmentService {
     public void validatePurchaseCanBeChanged(UUID purchaseId) {
         if (installmentRepository().existsPaidInvoiceInstallmentByPurchaseId(purchaseId)) {
             throw new BadRequestException("Compra possui parcela em fatura paga");
+        }
+    }
+
+    private void validateMonth(Integer month, String fieldName) {
+        if (month != null && (month < 1 || month > 12)) {
+            throw new BadRequestException(fieldName + " deve estar entre 1 e 12");
         }
     }
 
@@ -323,7 +353,7 @@ public class InstallmentService {
         };
     }
 
-    private Specification<CreditCardInstallment> filterFutureInstallments(UUID userId, UUID cardId, YearMonth from) {
+    private Specification<CreditCardInstallment> filterFutureInstallments(UUID userId, UUID cardId, YearMonth from, YearMonth to) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(criteriaBuilder.equal(root.get("userId"), userId));
@@ -335,6 +365,15 @@ public class InstallmentService {
                             criteriaBuilder.greaterThanOrEqualTo(root.get("competenceMonth"), (short) from.getMonthValue())
                     )
             ));
+            if (to != null) {
+                predicates.add(criteriaBuilder.or(
+                        criteriaBuilder.lessThan(root.get("competenceYear"), (short) to.getYear()),
+                        criteriaBuilder.and(
+                                criteriaBuilder.equal(root.get("competenceYear"), (short) to.getYear()),
+                                criteriaBuilder.lessThanOrEqualTo(root.get("competenceMonth"), (short) to.getMonthValue())
+                        )
+                ));
+            }
             if (cardId != null) {
                 var purchase = query.from(CardPurchase.class);
                 predicates.add(criteriaBuilder.equal(purchase.get("id"), root.get("purchaseId")));

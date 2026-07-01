@@ -169,6 +169,7 @@ Funcionalidades administrativas interessantes para evolução:
 
 - Cadastrar, editar e arquivar cartões.
 - Definir nome, limite total, dia de fechamento e dia de vencimento.
+- Ao editar fechamento ou vencimento do cartão, faturas abertas e futuras devem refletir as novas datas; faturas pagas mantêm o histórico.
 - Listar cartões com limite total, utilizado e disponível.
 - Criar faturas por competência conforme compras.
 - Agrupar compras por mês considerando fechamento e vencimento.

@@ -41,9 +41,19 @@ public class InstallmentController {
             @RequestParam(required = false) UUID cardId,
             @RequestParam(required = false) Integer fromMonth,
             @RequestParam(required = false) Integer fromYear,
+            @RequestParam(required = false) Integer toMonth,
+            @RequestParam(required = false) Integer toYear,
             Pageable pageable
     ) {
-        return PageResponse.from(installmentService.listFutureInstallments(currentUser.id(), cardId, fromMonth, fromYear, pageable));
+        return PageResponse.from(installmentService.listFutureInstallments(
+                currentUser.id(),
+                cardId,
+                fromMonth,
+                fromYear,
+                toMonth,
+                toYear,
+                pageable
+        ));
     }
 
     @GetMapping("/card-purchases/{purchaseId}/installments")

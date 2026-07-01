@@ -7,6 +7,7 @@ import com.zorysa.finance.creditcards.entity.CreditCard;
 import com.zorysa.finance.creditcards.mapper.CreditCardMapper;
 import com.zorysa.finance.creditcards.repository.CreditCardRepository;
 import com.zorysa.finance.installments.repository.CreditCardInstallmentRepository;
+import com.zorysa.finance.invoices.service.InvoiceService;
 import com.zorysa.finance.shared.exception.BadRequestException;
 import com.zorysa.finance.shared.exception.NotFoundException;
 import java.math.BigDecimal;
@@ -22,15 +23,18 @@ public class CreditCardService {
 
     private final ObjectProvider<CreditCardRepository> creditCardRepository;
     private final ObjectProvider<CreditCardInstallmentRepository> installmentRepository;
+    private final InvoiceService invoiceService;
     private final CreditCardMapper creditCardMapper;
 
     public CreditCardService(
             ObjectProvider<CreditCardRepository> creditCardRepository,
             ObjectProvider<CreditCardInstallmentRepository> installmentRepository,
+            InvoiceService invoiceService,
             CreditCardMapper creditCardMapper
     ) {
         this.creditCardRepository = creditCardRepository;
         this.installmentRepository = installmentRepository;
+        this.invoiceService = invoiceService;
         this.creditCardMapper = creditCardMapper;
     }
 
@@ -64,6 +68,8 @@ public class CreditCardService {
     @Transactional
     public CreditCardResponse updateCreditCard(UUID userId, UUID creditCardId, UpdateCreditCardRequest request) {
         CreditCard creditCard = findOwnedCreditCard(userId, creditCardId);
+        boolean billingDaysChanged = creditCard.getClosingDay() != request.closingDay()
+                || creditCard.getDueDay() != request.dueDay();
         creditCard.updateDetails(
                 request.name().trim(),
                 request.limitAmount(),
@@ -71,6 +77,9 @@ public class CreditCardService {
                 request.dueDay()
         );
         CreditCard saved = creditCardRepository().save(creditCard);
+        if (billingDaysChanged) {
+            rescheduleOpenInvoicesForBillingChange(userId, saved.getId(), saved.getClosingDay(), saved.getDueDay());
+        }
         return creditCardMapper.toResponse(saved, calculateUsedLimit(userId, saved.getId()));
     }
 
@@ -109,6 +118,10 @@ public class CreditCardService {
         if (!creditCard.canReceivePurchases()) {
             throw new BadRequestException("Cartao arquivado nao aceita compras");
         }
+    }
+
+    public void rescheduleOpenInvoicesForBillingChange(UUID userId, UUID creditCardId, int closingDay, int dueDay) {
+        invoiceService.rescheduleUnpaidInvoicesForCreditCard(userId, creditCardId, closingDay, dueDay);
     }
 
     private CreditCard findOwnedCreditCard(UUID userId, UUID creditCardId) {

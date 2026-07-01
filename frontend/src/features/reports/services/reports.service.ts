@@ -19,6 +19,8 @@ function reportParams(filters: ReportFilters) {
     page: filters.page,
     size: DEFAULT_PAGE_SIZE,
     startDate: filters.startDate,
+    toMonth: filters.toMonth,
+    toYear: filters.toYear,
     type: filters.type,
     year: filters.year,
   };

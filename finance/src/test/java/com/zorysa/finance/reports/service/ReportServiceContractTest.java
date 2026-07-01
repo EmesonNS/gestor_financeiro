@@ -81,7 +81,7 @@ class ReportServiceContractTest {
     }
 
     @Test
-    void shouldGenerateFutureInstallmentsReportForAuthenticatedUserCardAndStartCompetence() {
+    void shouldGenerateFutureInstallmentsReportForAuthenticatedUserCardAndCompetenceRange() {
         Method method = method("getFutureInstallmentsReport");
 
         assertPagedReport(method);
@@ -90,8 +90,8 @@ class ReportServiceContractTest {
                 .as("getFutureInstallmentsReport deve receber userId e cardId")
                 .isGreaterThanOrEqualTo(2);
         assertThat(integerParameterCount(method))
-                .as("getFutureInstallmentsReport deve receber fromMonth e fromYear")
-                .isEqualTo(2);
+                .as("getFutureInstallmentsReport deve receber fromMonth, fromYear, toMonth e toYear")
+                .isEqualTo(4);
     }
 
     @Test

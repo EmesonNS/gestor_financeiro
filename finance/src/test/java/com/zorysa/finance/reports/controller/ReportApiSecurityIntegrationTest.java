@@ -100,7 +100,9 @@ class ReportApiSecurityIntegrationTest {
                         .param("sort", "competenceYear,asc")
                         .param("cardId", CARD_ID.toString())
                         .param("fromMonth", "6")
-                        .param("fromYear", "2026"))
+                        .param("fromYear", "2026")
+                        .param("toMonth", "12")
+                        .param("toYear", "2026"))
                 .andExpect(status().isUnauthorized());
     }
 }

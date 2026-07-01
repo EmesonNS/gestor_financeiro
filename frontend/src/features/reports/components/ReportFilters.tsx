@@ -25,6 +25,28 @@ export function ReportFilters({ accounts, cards, categories, filters, onChange, 
     onChange({ ...filters, ...next, page: 0 });
   }
 
+  function updateFutureFromYear(value: string) {
+    const nextFromYear = Number(value) || undefined;
+    update({
+      fromYear: nextFromYear,
+      toYear: filters.toMonth && !filters.toYear ? nextFromYear : filters.toYear,
+    });
+  }
+
+  function updateFutureToMonth(value: string) {
+    const nextToMonth = Number(value) || undefined;
+    update({
+      toMonth: nextToMonth,
+      toYear: nextToMonth && !filters.toYear ? filters.fromYear : filters.toYear,
+    });
+  }
+
+  function updateFutureToYear(value: string) {
+    update({
+      toYear: Number(value) || (filters.toMonth ? filters.fromYear : undefined),
+    });
+  }
+
   const usesDateRange = reportType === 'transactions' || reportType === 'expenses-by-category' || reportType === 'credit-card-expenses';
   const usesYear = reportType === 'monthly-evolution';
   const usesDate = reportType === 'accounts-balance';
@@ -136,7 +158,15 @@ export function ReportFilters({ accounts, cards, categories, filters, onChange, 
           </label>
           <label className="block text-sm font-medium text-[#dcc3e8]" htmlFor="reportFromYear">
             Ano inicial
-            <input className={fieldClass} id="reportFromYear" max="2100" min="2000" onChange={(event) => update({ fromYear: Number(event.target.value) || undefined })} type="number" value={filterValue(filters.fromYear)} />
+            <input className={fieldClass} id="reportFromYear" max="2100" min="2000" onChange={(event) => updateFutureFromYear(event.target.value)} type="number" value={filterValue(filters.fromYear)} />
+          </label>
+          <label className="block text-sm font-medium text-[#dcc3e8]" htmlFor="reportToMonth">
+            Mes final
+            <input className={fieldClass} id="reportToMonth" max="12" min="1" onChange={(event) => updateFutureToMonth(event.target.value)} placeholder="Opcional" type="number" value={filterValue(filters.toMonth)} />
+          </label>
+          <label className="block text-sm font-medium text-[#dcc3e8]" htmlFor="reportToYear">
+            Ano final
+            <input className={fieldClass} id="reportToYear" max="2100" min="2000" onChange={(event) => updateFutureToYear(event.target.value)} placeholder="Opcional" type="number" value={filterValue(filters.toYear)} />
           </label>
         </>
       ) : null}

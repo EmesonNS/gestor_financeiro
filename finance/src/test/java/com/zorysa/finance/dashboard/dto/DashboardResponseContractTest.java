@@ -24,8 +24,7 @@ class DashboardResponseContractTest {
                 "creditLimitUsed"
         );
         assertThat(response.getRecordComponents())
-                .extracting(RecordComponent::getType)
-                .containsOnly(BigDecimal.class);
+                .allSatisfy(component -> assertThat(component.getType()).isEqualTo(BigDecimal.class));
     }
 
     @Test

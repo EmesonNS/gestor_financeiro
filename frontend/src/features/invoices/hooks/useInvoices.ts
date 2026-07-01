@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { accountKeys } from '../../accounts/hooks/useAccounts';
 import { creditCardKeys } from '../../credit-cards/hooks/useCreditCards';
@@ -25,6 +25,16 @@ export function useCurrentInvoice(cardId?: string) {
     enabled: Boolean(cardId),
     queryKey: invoiceKeys.current(cardId ?? ''),
     queryFn: () => invoicesService.getCurrentInvoice(cardId ?? ''),
+  });
+}
+
+export function useCurrentInvoices(cardIds: string[]) {
+  return useQueries({
+    queries: cardIds.map((cardId) => ({
+      enabled: Boolean(cardId),
+      queryKey: invoiceKeys.current(cardId),
+      queryFn: () => invoicesService.getCurrentInvoice(cardId),
+    })),
   });
 }
 

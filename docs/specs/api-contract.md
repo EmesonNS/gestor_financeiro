@@ -480,6 +480,7 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 
 - Auth: sim.
 - Response 200.
+- Regra: ao alterar `closingDay` ou `dueDay`, o back-end deve recalcular `closingDate` e `dueDate` das faturas do cartão que ainda não foram pagas. Faturas pagas preservam as datas históricas.
 
 ### DELETE `/api/credit-cards/{id}`
 
@@ -562,8 +563,14 @@ Todos os endpoints administrativos exigem autenticação com role `ADMIN`. As re
 ### GET `/api/installments/future`
 
 - Auth: sim.
-- Query: `page`, `size`, `sort`, `cardId`, `fromMonth`, `fromYear`.
+- Query: `page`, `size`, `sort`, `cardId`, `fromMonth`, `fromYear`, `toMonth`, `toYear`.
 - Response 200.
+- Regras:
+  - `fromMonth`/`fromYear` definem a competência inicial do intervalo.
+  - `toMonth`/`toYear` definem a competência final do intervalo e são opcionais.
+  - Quando o limite final for informado, o back-end deve filtrar o intervalo completo antes da paginação.
+  - `fromMonth` e `toMonth` devem estar entre 1 e 12.
+  - Quando o limite inicial e final forem informados, a competência final não pode ser anterior à competência inicial.
 
 ### GET `/api/card-purchases/{purchaseId}/installments`
 
@@ -607,6 +614,6 @@ Todos exigem autenticação e filtram por `user_id`.
 - GET `/api/reports/accounts-balance`: query `page`, `size`, `sort`, `date`.
 - GET `/api/reports/budget-vs-actual`: query `page`, `size`, `sort`, `month`, `year`.
 - GET `/api/reports/credit-card-expenses`: query `page`, `size`, `sort`, `cardId`, `startDate`, `endDate`.
-- GET `/api/reports/future-installments`: query `page`, `size`, `sort`, `cardId`, `fromMonth`, `fromYear`.
+- GET `/api/reports/future-installments`: query `page`, `size`, `sort`, `cardId`, `fromMonth`, `fromYear`, `toMonth`, `toYear`.
 
 Responses 200 variam por relatório; quando retornarem múltiplas linhas, devem usar o modelo paginado. Erros comuns: 400, 401.

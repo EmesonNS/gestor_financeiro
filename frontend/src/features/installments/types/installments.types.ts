@@ -59,6 +59,8 @@ export type FutureInstallmentFilters = {
   fromMonth?: number;
   fromYear?: number;
   page: number;
+  toMonth?: number;
+  toYear?: number;
 };
 
 export type PageResponse<T> = {

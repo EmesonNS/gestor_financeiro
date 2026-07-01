@@ -66,11 +66,29 @@ class InstallmentServiceContractTest {
                 .as("listInstallments deve aceitar filtros cardId, month e year")
                 .contains(UUID.class, Integer.class);
         assertThat(parameterTypes(listFutureInstallments))
-                .as("listFutureInstallments deve aceitar cardId, fromMonth e fromYear")
+                .as("listFutureInstallments deve aceitar cardId, fromMonth, fromYear, toMonth e toYear")
                 .contains(UUID.class, Integer.class);
+        assertThat(integerParameterCount(listFutureInstallments))
+                .as("listFutureInstallments deve receber fromMonth, fromYear, toMonth e toYear")
+                .isGreaterThanOrEqualTo(4);
         assertThat(uuidParameterCount(listPurchaseInstallments))
                 .as("listPurchaseInstallments deve receber userId e purchaseId")
                 .isGreaterThanOrEqualTo(2);
+    }
+
+    @Test
+    void shouldValidateFutureInstallmentsRangeBeforePagination() {
+        Class<?> service = findRequiredClass("com.zorysa.finance.installments.service.InstallmentService");
+
+        assertThat(methodNames(service))
+                .as("InstallmentService deve validar range de competencias antes de consultar pagina")
+                .contains("validateInstallmentCompetenceRange");
+        Method method = method(service, "validateInstallmentCompetenceRange");
+
+        assertThat(method.getReturnType()).isEqualTo(Void.TYPE);
+        assertThat(integerParameterCount(method))
+                .as("validateInstallmentCompetenceRange deve receber fromMonth, fromYear, toMonth e toYear")
+                .isEqualTo(4);
     }
 
     @Test

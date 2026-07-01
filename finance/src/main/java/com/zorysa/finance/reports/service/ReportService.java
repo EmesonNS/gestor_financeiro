@@ -250,9 +250,12 @@ public class ReportService {
             UUID cardId,
             Integer fromMonth,
             Integer fromYear,
+            Integer toMonth,
+            Integer toYear,
             Pageable pageable
     ) {
         YearMonth from = fromMonth != null && fromYear != null ? YearMonth.of(fromYear, fromMonth) : YearMonth.now();
+        YearMonth to = toMonth != null && toYear != null ? YearMonth.of(toYear, toMonth) : null;
         List<FutureInstallmentReportResponse> rows = entityManager().createQuery("""
                         select installment
                         from CreditCardInstallment installment
@@ -263,7 +266,10 @@ public class ReportService {
                 .getResultList()
                 .stream()
                 .filter(installment -> installment.getStatus() != InstallmentStatus.CANCELED)
-                .filter(installment -> YearMonth.of(installment.getCompetenceYear(), installment.getCompetenceMonth()).compareTo(from) >= 0)
+                .filter(installment -> {
+                    YearMonth competence = YearMonth.of(installment.getCompetenceYear(), installment.getCompetenceMonth());
+                    return competence.compareTo(from) >= 0 && (to == null || competence.compareTo(to) <= 0);
+                })
                 .map(installment -> {
                     CardPurchase purchase = entityManager().find(CardPurchase.class, installment.getPurchaseId());
                     if (purchase == null || (cardId != null && !cardId.equals(purchase.getCreditCardId()))) {

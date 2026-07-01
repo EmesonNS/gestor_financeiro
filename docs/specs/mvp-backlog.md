@@ -357,6 +357,7 @@ Objetivo: controlar cartões, limites e compras.
 Features: cadastrar, editar, arquivar, listar limites.
 
 Tarefas back-end: entidade, CRUD, cálculo de limite usado e disponível.
+- Recalcular datas de fechamento e vencimento de faturas não pagas quando fechamento ou vencimento do cartão forem alterados.
 
 Tarefas front-end: listagem, formulário, detalhes do cartão.
 
@@ -366,6 +367,12 @@ Critérios de aceite:
 Dado que estou autenticado,
 quando crio um cartão com limite e vencimento,
 então ele aparece na minha lista com limite total, utilizado e disponível.
+```
+
+```text
+Dado que tenho faturas abertas ou futuras de um cartão,
+quando altero o dia de vencimento ou fechamento do cartão,
+então as faturas não pagas passam a refletir as novas datas e faturas pagas preservam o histórico.
 ```
 
 Prioridade: P1.
@@ -428,6 +435,12 @@ então o sistema deve gerar 10 parcelas e associá-las às faturas corretas.
 Dado que uma compra possui parcela em fatura paga,
 quando tento editar a compra,
 então o sistema deve bloquear a edição.
+```
+
+```text
+Dado que tenho parcelas futuras em várias competências,
+quando filtro a página de parcelas por competência inicial e final,
+então o back-end deve retornar apenas parcelas dentro do intervalo antes de aplicar a paginação.
 ```
 
 Prioridade: P1.

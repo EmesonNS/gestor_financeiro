@@ -33,6 +33,8 @@ export const installmentsService = {
         fromYear: filters.fromYear,
         page: filters.page,
         size: DEFAULT_PAGE_SIZE,
+        toMonth: filters.toMonth,
+        toYear: filters.toYear,
       },
     });
     return data;

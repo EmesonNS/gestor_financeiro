@@ -92,8 +92,18 @@ public class ReportController {
             @RequestParam(required = false) UUID cardId,
             @RequestParam(required = false) Integer fromMonth,
             @RequestParam(required = false) Integer fromYear,
+            @RequestParam(required = false) Integer toMonth,
+            @RequestParam(required = false) Integer toYear,
             Pageable pageable
     ) {
-        return PageResponse.from(reportService.getFutureInstallmentsReport(currentUser.id(), cardId, fromMonth, fromYear, pageable));
+        return PageResponse.from(reportService.getFutureInstallmentsReport(
+                currentUser.id(),
+                cardId,
+                fromMonth,
+                fromYear,
+                toMonth,
+                toYear,
+                pageable
+        ));
     }
 }

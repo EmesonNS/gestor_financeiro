@@ -149,6 +149,7 @@ src/main/java/com/zorysa/finance
 
 - Cadastro de cartões, limite, fechamento, vencimento, arquivamento.
 - Cálculo de limite utilizado e disponível.
+- Alteração de dia de fechamento ou vencimento deve atualizar datas de faturas abertas/futuras do cartão.
 
 ### invoices
 
@@ -398,13 +399,17 @@ Repositories financeiros devem oferecer métodos filtrando por `id` e `userId`, 
 - Não permitir alterar compras de faturas pagas, salvo regra futura de estorno.
 - Cartões arquivados não aceitam novas compras.
 - Faturas pagas não recebem novas parcelas.
+- Alterar fechamento ou vencimento do cartão recalcula datas de fechamento e vencimento das faturas não pagas; faturas pagas preservam as datas históricas.
 - Limite disponível considera compras em faturas abertas e futuras ainda não pagas.
 
 ## 18. Regras de negócio de parcelamentos
 
 - Usuário informa valor total, quantidade de parcelas, data da compra e cartão.
 - Sistema calcula parcelas e associa cada uma à fatura correta.
-- Parcelas futuras devem ser listáveis.
+- Parcelas futuras devem ser listáveis por intervalo de competência com início (`fromMonth`, `fromYear`) e fim opcional (`toMonth`, `toYear`).
+- O filtro de intervalo de parcelas deve ser aplicado no back-end antes da paginação; o front-end não deve simular limite final filtrando apenas a página atual.
+- Meses de competência devem aceitar apenas valores entre 1 e 12.
+- Quando início e fim forem informados, a competência final não pode ser anterior à competência inicial.
 - Detalhes da compra original devem ser consultáveis.
 - Cancelamento não pode alterar faturas pagas.
 - Edição é bloqueada se qualquer parcela pertencer a fatura paga.

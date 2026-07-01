@@ -9,6 +9,9 @@ import { useBudgets } from '../../budgets/hooks/useBudgets';
 import { useCategories } from '../../categories/hooks/useCategories';
 import { DashboardGoalsPanel } from '../../goals/components/DashboardGoalsPanel';
 import { useGoals } from '../../goals/hooks/useGoals';
+import { useCreditCards } from '../../credit-cards/hooks/useCreditCards';
+import { DashboardInvoicesDuePanel } from '../../invoices/components/DashboardInvoicesDuePanel';
+import { useCurrentInvoices } from '../../invoices/hooks/useInvoices';
 import { DashboardMetricCard } from '../components/DashboardMetricCard';
 import { ExpenseCategoryChart } from '../components/ExpenseCategoryChart';
 import { FutureDependencyPanel } from '../components/FutureDependencyPanel';
@@ -71,9 +74,14 @@ export function DashboardPage() {
   const budgetsQuery = useBudgets({ month: period.month, page: 0, year: period.year });
   const budgetCategoriesQuery = useCategories({ page: 0, type: 'EXPENSE' });
   const activeGoalsQuery = useGoals({ page: 0, status: 'ACTIVE' });
+  const creditCardsQuery = useCreditCards({ archived: false, page: 0 });
+  const activeCreditCards = useMemo(() => creditCardsQuery.data?.content ?? [], [creditCardsQuery.data?.content]);
+  const currentInvoiceQueries = useCurrentInvoices(activeCreditCards.map((card) => card.id));
   const summary = summaryQuery.data;
   const monthly = monthlyQuery.data;
   const expenses = expensesQuery.data?.content ?? [];
+  const currentInvoices = currentInvoiceQueries.flatMap((query) => (query.data ? [query.data] : []));
+  const isLoadingCurrentInvoices = creditCardsQuery.isLoading || currentInvoiceQueries.some((query) => query.isLoading);
   const incomeExpenseRows = useMemo(
     () => [...(incomeExpenseFirstPageQuery.data?.content ?? []), ...(incomeExpenseSecondPageQuery.data?.content ?? [])].sort((first, second) => first.month - second.month),
     [incomeExpenseFirstPageQuery.data?.content, incomeExpenseSecondPageQuery.data?.content],
@@ -196,6 +204,8 @@ export function DashboardPage() {
         />
 
         <DashboardGoalsPanel goals={activeGoalsQuery.data?.content ?? []} isLoading={activeGoalsQuery.isLoading} />
+
+        <DashboardInvoicesDuePanel cards={activeCreditCards} invoices={currentInvoices} isLoading={isLoadingCurrentInvoices} />
 
         <div>
           {expensesQuery.isError ? (
